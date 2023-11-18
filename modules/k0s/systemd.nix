@@ -1,0 +1,100 @@
+{
+  pkgs,
+  config,
+  lib,
+  cfg,
+  ...
+}: let
+  node_name = "${config.networking.hostName}.${config.networking.domain}";
+  kubelet_args = "${
+    if cfg.cloudProvider != null
+    then "--cloud-provider=${cfg.cloudProvider}"
+    else ""
+  } --hostname-override=${node_name}";
+  startK0s = joinToken:
+    pkgs.writeShellScript "start_k0s.sh" ''
+      ${pkgs.k0s}/bin/k0s ${cfg.mode} \
+        ${
+        if joinToken != null
+        then "--token-file=/etc/k0s/token-file"
+        else ""
+      } ${
+        if (cfg.mode == "worker")
+        then ''          \
+          --kubelet-extra-args='${kubelet_args}' ''
+        else ""
+      }'';
+  bundles = [pkgs.k0sBundle] ++ cfg.bundles;
+  mkCerts = master:
+    if master != null
+    then ''
+      OPENSSL=${pkgs.openssl}/bin/openssl
+      # This is a one time only thing, do not change already bootstrapped
+      # certificates in running cluster. TODO: CA rotation.
+      if [ ! -f /var/lib/k0s/pki/ca.key ]; then
+        export LIFETIME=365
+        mkdir -p /var/lib/k0s/pki/etcd
+        cd /var/lib/k0s/pki
+        cp "${master.ca."/var/lib/k0s/pki/ca".key}" ca.key
+        cp "${master.ca."/var/lib/k0s/pki/ca".crt}" ca.crt
+        $OPENSSL genrsa -out sa.key 4096
+        $OPENSSL rsa -in sa.key -outform PEM -pubout -out sa.pub
+        cd ./etcd
+        $OPENSSL genrsa -out ca.key 4096
+        $OPENSSL req -x509 -new -nodes -key ca.key -sha256 -days $LIFETIME -out ca.crt -subj "/CN=Custom CA"
+      fi
+    ''
+    else "";
+  mkJoinToken = token:
+    if token != null
+    then ''
+      mkdir -p /etc/k0s
+      echo "${cfg.joinToken}" > /etc/k0s/token-file
+    ''
+    else "";
+in {
+  preStart = ''
+    ${mkCerts cfg.master}
+    ${mkJoinToken cfg.joinToken}
+  '';
+  # k0s does not seem to correctly import images, failing with some but k0s ctr does succeed.
+  postStart = ''
+    if [ "x${cfg.mode}" == "xcontroller" ]; then
+      exit 0
+    fi
+    until k0s ctr info; do
+      echo "waiting for containerd"
+      sleep 1
+    done
+    import () {
+      until k0s ctr images import --digests --no-unpack --local $1; do
+        sleep 1
+      done
+    }
+    ${lib.concatStringsSep "\n" (
+      lib.forEach bundles (bundle: "for img in ${bundle}/*; do import $img; done")
+    )}
+  '';
+  path = [pkgs.k0s pkgs.mount pkgs.util-linux pkgs.kmod];
+  wants = ["network-online.target"];
+  documentation = ["https://docs.k0sproject.io"];
+  description = "k0s - Zero Friction Kubernetes";
+  after = ["network-online.target"];
+  startLimitIntervalSec = 5;
+  startLimitBurst = 10;
+  script = "${startK0s cfg.joinToken}";
+  wantedBy = ["default.target"];
+  unitConfig = {
+    ConditionFileIsExecutable = "${pkgs.k0s}/bin/k0s";
+  };
+  serviceConfig = {
+    RestartSec = 120;
+    Delegate = "yes";
+    KillMode = "control-group";
+    LimitCORE = "infinity";
+    TasksMax = "infinity";
+    TimeoutStartSec = "0";
+    LimitNOFILE = 999999;
+    Restart = "on-failure";
+  };
+}

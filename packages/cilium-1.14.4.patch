@@ -1,0 +1,44 @@
+diff --color -rupN a/templates/cilium-agent/daemonset.yaml b/templates/cilium-agent/daemonset.yaml
+--- a/templates/cilium-agent/daemonset.yaml	2023-11-13 21:56:54.000000000 +0100
++++ b/templates/cilium-agent/daemonset.yaml	2023-11-16 19:53:47.407233271 +0100
+@@ -772,7 +772,7 @@ spec:
+         # To be able to load kernel modules
+       - name: lib-modules
+         hostPath:
+-          path: /lib/modules
++          path: {{ .Values.libModulesPath }}
+         # To access iptables concurrently with other processes (e.g. kube-proxy)
+       - name: xtables-lock
+         hostPath:
+diff --color -rupN a/templates/spire/agent/daemonset.yaml b/templates/spire/agent/daemonset.yaml
+--- a/templates/spire/agent/daemonset.yaml	2023-11-13 21:56:55.000000000 +0100
++++ b/templates/spire/agent/daemonset.yaml	2023-11-19 01:29:21.636631180 +0100
+@@ -32,7 +32,7 @@ spec:
+       serviceAccountName: {{ .Values.authentication.mutual.spire.install.agent.serviceAccount.name }}
+       initContainers:
+         - name: init
+-          image: docker.io/library/busybox:1.35.0@sha256:223ae047b1065bd069aac01ae3ac8088b3ca4a527827e283b85112f29385fb1b
++          image: docker.io/library/busybox:1.35.0
+           command:
+             - /bin/sh
+             - -c
+diff --color -rupN a/templates/spire/server/statefulset.yaml b/templates/spire/server/statefulset.yaml
+--- a/templates/spire/server/statefulset.yaml	2023-11-13 21:56:55.000000000 +0100
++++ b/templates/spire/server/statefulset.yaml	2023-11-19 01:29:34.933668243 +0100
+@@ -35,7 +35,7 @@ spec:
+       {{- end }}
+       containers:
+       - name: cilium-init
+-        image: docker.io/library/busybox:1.35.0@sha256:223ae047b1065bd069aac01ae3ac8088b3ca4a527827e283b85112f29385fb1b
++        image: docker.io/library/busybox:1.35.0
+         command:
+           - /bin/sh
+           - -c
+diff --color -rupN a/values.yaml b/values.yaml
+--- a/values.yaml	2023-11-13 21:56:54.000000000 +0100
++++ b/values.yaml	2023-11-16 19:53:47.410566654 +0100
+@@ -3200,3 +3200,4 @@ authentication:
+       agentSocketPath: /run/spire/sockets/agent/agent.sock
+       # -- SPIRE connection timeout
+       connectionTimeout: 30s
++libModulesPath: /lib/modules
