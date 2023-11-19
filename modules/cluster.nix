@@ -186,11 +186,11 @@ in {
                 type = attrsOf (submodule {
                   options = {
                     key = mkOption {
-                      type = path;
+                      type = either path str;
                       description = "Cluster CA key.";
                     };
                     crt = mkOption {
-                      type = path;
+                      type = either path str;
                       description = "Cluster CA certificate.";
                     };
                   };
