@@ -9,6 +9,10 @@
         name = "simple-pair-cluster";
         test = ./simple-pair-cluster.nix;
       }
+      {
+        name = "three-to-three-cluster";
+        test = ./three-to-three-cluster.nix;
+      }
     ] (testCase: let
       test = import testCase.test {inherit makeTest eval-config pkgs;};
     in {

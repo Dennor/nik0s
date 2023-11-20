@@ -14,10 +14,12 @@ final: prev:
   lib =
     prev.lib
     // {
-      k0s-utils = {
-        mkHelmChart = import ../lib/helm.nix;
-        mkBundle = import ../lib/airgap.nix;
-      };
+      k0s-utils =
+        {
+          mkHelmChart = import ../lib/helm.nix;
+          mkBundle = import ../lib/airgap.nix;
+        }
+        // import ../lib/cluster {pkgs = final;};
     };
 }
 // import ../packages {pkgs = final;}
