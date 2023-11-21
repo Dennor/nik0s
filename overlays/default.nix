@@ -19,7 +19,7 @@ final: prev:
           mkHelmChart = import ../lib/helm.nix;
           mkBundle = import ../lib/airgap.nix;
         }
-        // import ../lib/cluster {pkgs = final;};
+        // import ../lib/cluster.nix {pkgs = final;};
     };
 }
 // import ../packages {pkgs = final;}
