@@ -40,7 +40,10 @@ with pkgs; let
     directRoutingDevice ? (testCase: node: node.config.node.network.private.link),
     manifests ? (testCase: node:
       if node.config.pool.kind == "controller"
-      then [[auth.controller.manifest auth.worker.manifest]]
+      ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+      ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+      ### SOPS OR SOME SUCH
+      then [(builtins.attrValues (builtins.mapAttrs (_: value: ../tests/bootstrap-token-${value.id}.yaml) auth))]
       else []),
     podCIDR ? (testCase: node: ["10.0.0.0/16"]),
     modules ? (

@@ -24,7 +24,7 @@
         import ./packages {inherit pkgs;});
 
       checks = forAllSystems (system: let
-        mkCluster = import ./tests/mkcluster.nix {inherit pkgs;};
+        mkCluster = import ./tests/lib.nix {inherit pkgs self;};
         pkgs = nixpkgs.legacyPackages.${system}.extend self.overlays.default;
         fmt-check = pkgs.stdenv.mkDerivation {
           name = "fmt-check";
@@ -44,7 +44,7 @@
           eval-config = import (pkgs.path + "/nixos/lib/eval-config.nix");
         });
       in
-        {inherit fmt-check mkCluster;} // tests);
+        {inherit fmt-check;} // mkCluster // tests);
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 

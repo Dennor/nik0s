@@ -194,7 +194,7 @@ with types; let
         default = null;
       };
       joinToken = mkOption {
-        type = nullOr str;
+        type = nullOr (either str path);
         description = "Node join token";
         default = null;
       };

@@ -84,7 +84,7 @@ in {
       default = null;
     };
     joinToken = mkOption {
-      type = nullOr str;
+      type = nullOr (either path str);
       description = "Join token for node";
       default = null;
     };

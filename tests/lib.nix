@@ -1,4 +1,7 @@
-{pkgs ? import <nixpkgs> {}}:
+{
+  pkgs ? import <nixpkgs> {},
+  self ? ./.,
+}:
 with pkgs.lib; let
   clusterLib = import ../lib/cluster.nix {inherit pkgs;};
   mkNet = cfg: addresses:
@@ -62,7 +65,7 @@ with pkgs.lib; let
       }
     ];
   };
-  public = (mkNet privateCfg) {
+  public = (mkNet publicCfg) {
     controllers-0 = {
       controller-0 = {
         addresses = [
@@ -128,7 +131,7 @@ with pkgs.lib; let
         nodes = genAttrs ["worker-0" "worker-1" "worker-2"] (node: {
           network = {
             private = private.workers-0.${node};
-            public = private.workers-0.${node};
+            public = public.workers-0.${node};
           };
         });
       };
@@ -141,5 +144,12 @@ with pkgs.lib; let
     apiPort = 6443;
   };
   drv = clusterLib.mkCluster cluster;
-in
-  drv
+  installScript = clusterLib.mkInstallScript {
+    inherit cluster;
+    flake = self;
+  } {inherit (pkgs) stdenv;};
+  updateScript = clusterLib.mkUpdateScript {
+    inherit cluster;
+    flake = self;
+  } {inherit (pkgs) stdenv;};
+in {inherit drv installScript updateScript;}

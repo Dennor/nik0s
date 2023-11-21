@@ -72,6 +72,9 @@
               master = {
                 ca = {
                   "/var/lib/k0s/pki/ca" = {
+                    ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+                    ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+                    ### SOPS OR SOME SUCH
                     key = ./ca.key;
                     crt = ./ca.crt;
                   };
@@ -85,7 +88,10 @@
           nodes = {
             testworker = {
               network = network "worker";
-              joinToken = auth.worker.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.worker.id}.${auth.worker.secret};
             };
           };
         };

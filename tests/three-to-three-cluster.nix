@@ -87,6 +87,9 @@
               master = {
                 ca = {
                   "/var/lib/k0s/pki/ca" = {
+                    ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+                    ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+                    ### SOPS OR SOME SUCH
                     key = ./ca.key;
                     crt = ./ca.crt;
                   };
@@ -95,11 +98,17 @@
             };
             controller1 = {
               network = network "controller1";
-              joinToken = auth.controller.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.controller.id}.${auth.controller.secret};
             };
             controller2 = {
               network = network "controller2";
-              joinToken = auth.controller.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.controller.id}.${auth.controller.secret};
             };
           };
         };
@@ -108,15 +117,24 @@
           nodes = {
             worker0 = {
               network = network "worker0";
-              joinToken = auth.worker.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.worker.id}.${auth.worker.secret};
             };
             worker1 = {
               network = network "worker1";
-              joinToken = auth.worker.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.worker.id}.${auth.worker.secret};
             };
             worker2 = {
               network = network "worker2";
-              joinToken = auth.worker.token;
+              ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
+              ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
+              ### SOPS OR SOME SUCH
+              joinToken = ./token_${auth.worker.id}.${auth.worker.secret};
             };
           };
         };

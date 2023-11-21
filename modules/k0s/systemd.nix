@@ -13,6 +13,8 @@
   } --hostname-override=${node_name}";
   startK0s = joinToken:
     pkgs.writeShellScript "start_k0s.sh" ''
+      set -e
+
       ${pkgs.k0s}/bin/k0s ${cfg.mode} \
         ${
         if joinToken != null
@@ -28,6 +30,8 @@
   mkCerts = master:
     if master != null
     then ''
+      set -e
+
       OPENSSL=${pkgs.openssl}/bin/openssl
       # This is a one time only thing, do not change already bootstrapped
       # certificates in running cluster. TODO: CA rotation.
@@ -48,8 +52,14 @@
   mkJoinToken = token:
     if token != null
     then ''
+      set -e
+
       mkdir -p /etc/k0s
-      echo "${cfg.joinToken}" > /etc/k0s/token-file
+      ${
+        if builtins.isPath cfg.joinToken
+        then "cp \"${cfg.joinToken}\" /etc/k0s/token-file"
+        else "echo \"${cfg.joinToken}\" > /etc/k0s/token-file"
+      }
     ''
     else "";
 in {
@@ -59,6 +69,8 @@ in {
   '';
   # k0s does not seem to correctly import images, failing with some but k0s ctr does succeed.
   postStart = ''
+    set -e
+
     if [ "x${cfg.mode}" == "xcontroller" ]; then
       exit 0
     fi
