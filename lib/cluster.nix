@@ -26,8 +26,8 @@ with pkgs.lib; let
                 node = cluster.pools.${poolName}.nodes.${n};
                 publicAddr = builtins.elemAt node.network.public.ipv4.addresses 0;
               in {
-                kind = pool.kind;
-                name = "${n}.${poolName}.${cluster.name}";
+                inherit pool node;
+                fqdn = "${n}.${poolName}.${cluster.name}";
                 address = publicAddr.address;
               }) (
                 builtins.attrNames pool.nodes
@@ -51,7 +51,7 @@ in {
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
 
-      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${node.name} root@${node.address}")
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${node.fqdn} root@${node.address}")
           nodes))}
     '';
   in
@@ -100,10 +100,10 @@ in {
       }
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: "${
-          if node.kind == "controller"
+          if node.pool.kind == "controller"
           then "update_controller"
           else "update_worker"
-        } ${node.name} ${node.address}")
+        } ${node.fqdn} ${node.address}")
         nodes))}
     '';
   in
