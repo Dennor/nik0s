@@ -55,11 +55,7 @@
       set -e
 
       mkdir -p /etc/k0s
-      ${
-        if builtins.isPath cfg.joinToken
-        then "cp \"${cfg.joinToken}\" /etc/k0s/token-file"
-        else "echo \"${cfg.joinToken}\" > /etc/k0s/token-file"
-      }
+      cp "${cfg.joinToken}" /etc/k0s/token-file
     ''
     else "";
 in {

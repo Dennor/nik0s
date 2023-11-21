@@ -40,6 +40,7 @@ with pkgs.lib; let
   controllerNodes = clusterNodesByKind "controller";
   workerNodes = clusterNodesByKind "worker";
 in {
+  inherit clusterNodes controllerNodes workerNodes;
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
     flake,
