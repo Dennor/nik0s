@@ -1,14 +1,15 @@
 {pkgs}:
 with pkgs.lib; let
+  removeListedAttrs = attrs: removeNames: filterAttrs (name: _: (builtins.any (v: v != name) removeNames)) attrs;
+  keepListedAttrs = attrs: keepNames: filterAttrs (name: _: (builtins.any (v: v == name) keepNames)) attrs;
   clusterFields = builtins.attrNames (import ./cluster_opts.nix {inherit (pkgs) lib;});
-  filterFields = name: _: (builtins.any (v: v == name) clusterFields);
   checkCluster = cluster:
     (evalModules {
       modules = [
         ../modules/base_cluster.nix
         {
           config = {
-            cluster = filterAttrs filterFields cluster;
+            cluster = keepListedAttrs cluster clusterFields;
           };
         }
       ];
@@ -24,12 +25,15 @@ with pkgs.lib; let
             then
               builtins.map (n: let
                 node = cluster.pools.${poolName}.nodes.${n};
-                publicAddr = builtins.elemAt node.network.public.ipv4.addresses 0;
-              in {
-                inherit pool node;
-                fqdn = "${n}.${poolName}.${cluster.name}";
-                address = publicAddr.address;
-              }) (
+              in
+                cluster
+                // {
+                  inherit pool node;
+                  machine = {
+                    node = n;
+                    pool = poolName;
+                  };
+                }) (
                 builtins.attrNames pool.nodes
               )
             else []
@@ -40,8 +44,11 @@ with pkgs.lib; let
   clusterNodes = clusterNodesByKind null;
   controllerNodes = clusterNodesByKind "controller";
   workerNodes = clusterNodesByKind "worker";
+  nodeFQDN = node: "${node.machine.node}.${node.machine.pool}.${node.name}";
+  nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
+  nodeConfig = node: removeListedAttrs node ["pool" "node"];
 in {
-  inherit clusterNodes controllerNodes workerNodes;
+  inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress;
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
     flake,
@@ -51,7 +58,7 @@ in {
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
 
-      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${node.fqdn} root@${node.address}")
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node}")
           nodes))}
     '';
   in
@@ -72,7 +79,7 @@ in {
     controllers = controllerNodes cluster;
     workers = workerNodes cluster;
     nodes = controllers ++ workers;
-    managmentAddress = (builtins.elemAt controllers 0).address;
+    managmentAddress = nodeAddress (builtins.elemAt controllers 0);
     updateScript = pkgs.writeShellScript "update_cluster.sh" ''
       set -e
 
@@ -103,7 +110,7 @@ in {
           if node.pool.kind == "controller"
           then "update_controller"
           else "update_worker"
-        } ${node.fqdn} ${node.address}")
+        } ${nodeFQDN node} ${nodeAddress node}")
         nodes))}
     '';
   in
