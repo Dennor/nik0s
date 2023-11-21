@@ -59,8 +59,9 @@ in {
       src = flake;
       name = "install-${cluster.name}";
       installPhase = ''
-        cp ${installScript} $out
-        chmod +x $out
+        mkdir -p $out/bin
+        cp ${installScript} $out/bin/install-${cluster.name}
+        chmod +x $out/bin/install-${cluster.name}
       '';
     };
   mkUpdateScript = {
@@ -110,8 +111,9 @@ in {
       src = flake;
       name = "update-${cluster.name}";
       installPhase = ''
-        cp ${updateScript} $out
-        chmod +x $out
+        mkdir -p $out/bin
+        cp ${updateScript} $out/bin/update-${cluster.name}
+        chmod +x $out/bin/update-${cluster.name}
       '';
     };
 }
