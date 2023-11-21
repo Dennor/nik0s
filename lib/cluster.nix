@@ -34,7 +34,7 @@ with pkgs.lib; let
               )
             else []
         )
-        cluster.pools
+        (checkCluster cluster).pools
       )
     );
   clusterNodes = clusterNodesByKind null;
@@ -47,7 +47,7 @@ in {
     flake,
     cluster,
   }: let
-    nodes = clusterNodes (checkCluster cluster);
+    nodes = clusterNodes cluster;
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
 
@@ -69,8 +69,8 @@ in {
     cluster,
   }: let
     # Enforce order of update, controller nodes first
-    controllers = controllerNodes (checkCluster cluster);
-    workers = workerNodes (checkCluster cluster);
+    controllers = controllerNodes cluster;
+    workers = workerNodes cluster;
     nodes = controllers ++ workers;
     managmentAddress = (builtins.elemAt controllers 0).address;
     updateScript = pkgs.writeShellScript "update_cluster.sh" ''
