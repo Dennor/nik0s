@@ -147,9 +147,9 @@ with pkgs.lib; let
   installScript = clusterLib.mkInstallScript {
     inherit cluster;
     flake = self;
-  } {inherit (pkgs) stdenv;};
+  };
   updateScript = clusterLib.mkUpdateScript {
     inherit cluster;
     flake = self;
-  } {inherit (pkgs) stdenv;};
+  };
 in {inherit drv installScript updateScript;}

@@ -21,7 +21,8 @@ with pkgs.lib; let
         builtins.mapAttrs (
           poolName: pool:
             if kind == null || kind == pool.kind
-            then builtins.map (n: let
+            then
+              builtins.map (n: let
                 node = cluster.pools.${poolName}.nodes.${n};
                 publicAddr = builtins.elemAt node.network.public.ipv4.addresses 0;
               in {
@@ -45,7 +46,7 @@ in {
   mkInstallScript = {
     flake,
     cluster,
-  }: {stdenv}: let
+  }: let
     nodes = clusterNodes (checkCluster cluster);
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
@@ -54,7 +55,7 @@ in {
           nodes))}
     '';
   in
-    stdenv.mkDerivation {
+    pkgs.stdenv.mkDerivation {
       src = flake;
       name = "install-${cluster.name}";
       installPhase = ''
@@ -65,7 +66,7 @@ in {
   mkUpdateScript = {
     flake,
     cluster,
-  }: {stdenv}: let
+  }: let
     # Enforce order of update, controller nodes first
     controllers = controllerNodes (checkCluster cluster);
     workers = workerNodes (checkCluster cluster);
@@ -98,14 +99,14 @@ in {
       }
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: "${
-        if node.kind == "controller"
-        then "update_controller"
-        else "update_worker"
-      } ${node.name} ${node.address}")
-          nodes))}
+          if node.kind == "controller"
+          then "update_controller"
+          else "update_worker"
+        } ${node.name} ${node.address}")
+        nodes))}
     '';
   in
-    stdenv.mkDerivation {
+    pkgs.stdenv.mkDerivation {
       src = flake;
       name = "update-${cluster.name}";
       installPhase = ''
