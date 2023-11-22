@@ -39,8 +39,8 @@
         export LIFETIME=365
         mkdir -p /var/lib/k0s/pki/etcd
         cd /var/lib/k0s/pki
-        cp "${builtins.toString master.ca."/var/lib/k0s/pki/ca".key}" ca.key
-        cp "${builtins.toString master.ca."/var/lib/k0s/pki/ca".crt}" ca.crt
+        cp "${master.ca."/var/lib/k0s/pki/ca".key}" ca.key
+        cp "${master.ca."/var/lib/k0s/pki/ca".crt}" ca.crt
         $OPENSSL genrsa -out sa.key 4096
         $OPENSSL rsa -in sa.key -outform PEM -pubout -out sa.pub
         cd ./etcd
@@ -55,7 +55,7 @@
       set -e
 
       mkdir -p /etc/k0s
-      cp "${builtins.toString cfg.joinToken}" /etc/k0s/token-file
+      cp "${cfg.joinToken}" /etc/k0s/token-file
     ''
     else "";
 in {

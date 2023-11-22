@@ -68,9 +68,9 @@ in {
 
       nodeScript() {
         mkdir -p $tmpdir/$1
-        pushd $tmpdir/$1 > /dev/null
+        pushd $tmpdir/$1
         $2
-        popd > /dev/null
+        popd
       }
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
