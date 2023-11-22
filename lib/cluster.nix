@@ -53,13 +53,35 @@ in {
   mkInstallScript = {
     flake,
     cluster,
+    workerScript ? null,
+    controllerScript ? null,
   }: let
     nodes = clusterNodes cluster;
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
 
-      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node}")
-          nodes))}
+      nodeScript() {
+        mkdir -p $1
+        pushd $1
+        $3
+        popd
+        ${pkgs.rsync}/bin/rsync -av $1/ root@$2:/
+      }
+
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
+          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node}
+          ${let
+            script =
+              if node.pool.kind == "controller"
+              then controllerScript
+              else workerScript;
+          in
+            if script != null
+            then "nodeScript ${nodeFQDN node} ${nodeAddress node} ${script}"
+            else ""}
+        '')
+        nodes))}
+
     '';
   in
     pkgs.stdenv.mkDerivation {

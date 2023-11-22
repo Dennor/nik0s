@@ -147,6 +147,8 @@ with pkgs.lib; let
   installScript = clusterLib.mkInstallScript {
     inherit cluster;
     flake = self;
+    controllerScript = ./script.sh;
+    workerScript = ./script.sh;
   };
   updateScript = clusterLib.mkUpdateScript {
     inherit cluster;
