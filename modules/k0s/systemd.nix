@@ -41,6 +41,8 @@
         cd /var/lib/k0s/pki
         cp "${builtins.toString master.ca."/var/lib/k0s/pki/ca".key}" ca.key
         cp "${builtins.toString master.ca."/var/lib/k0s/pki/ca".crt}" ca.crt
+        chmod 640 ca.key ca.crt
+        chown kube-apiserver ca.crt
         $OPENSSL genrsa -out sa.key 4096
         $OPENSSL rsa -in sa.key -outform PEM -pubout -out sa.pub
         cd ./etcd

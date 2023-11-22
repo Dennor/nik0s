@@ -11,7 +11,7 @@ with lib;
       manifestYAML = "${manifestPath}/manifests.yaml";
       mkResourceYAMLs = manifest:
         builtins.map (res:
-          if builtins.isPath res
+          if builtins.isPath res || builtins.isString res
           then res
           else yaml.generate "resource.yaml" res)
         manifest;
