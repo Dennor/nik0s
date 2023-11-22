@@ -60,16 +60,20 @@ in {
     installScript = pkgs.writeShellScript "install_cluster.sh" ''
       set -e
 
+      tmpdir=$(mktemp -d)
+      cleanup() {
+        rm -rf "$tmpdir"
+      }
+      trap cleanup EXIT
+
       nodeScript() {
-        mkdir -p $1
-        pushd $1
-        $3
+        mkdir -p $tmpdir/$1
+        pushd $tmpdir/$1
+        $2
         popd
-        ${pkgs.rsync}/bin/rsync -av $1/ root@$2:/
       }
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
-          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node}
           ${let
             script =
               if node.pool.kind == "controller"
@@ -77,8 +81,13 @@ in {
               else workerScript;
           in
             if script != null
-            then "nodeScript ${nodeFQDN node} ${nodeAddress node} ${script}"
+            then "nodeScript ${nodeFQDN node} ${script}"
             else ""}
+          EXTRA_ARGS=""
+          if [ -d "$tmpdir/${nodeFQDN node}" ]; then
+            EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
+          fi
+          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
         '')
         nodes))}
 
