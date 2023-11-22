@@ -48,7 +48,7 @@ with pkgs.lib; let
   nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
   nodeConfig = node: removeListedAttrs node ["pool" "node"];
 in {
-  inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress;
+  inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig;
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
     flake,
