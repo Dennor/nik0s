@@ -1,6 +1,6 @@
 {pkgs}:
 with pkgs.lib; let
-  removeListedAttrs = attrs: removeNames: filterAttrs (name: _: (builtins.any (v: v != name) removeNames)) attrs;
+  removeListedAttrs = attrs: removeNames: filterAttrs (name: _: ((builtins.any (v: v == name) removeNames) == false)) attrs;
   keepListedAttrs = attrs: keepNames: filterAttrs (name: _: (builtins.any (v: v == name) keepNames)) attrs;
   clusterFields = builtins.attrNames (import ./cluster_opts.nix {inherit (pkgs) lib;});
   checkCluster = cluster:
