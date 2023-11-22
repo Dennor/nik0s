@@ -37,6 +37,11 @@ in {
           default = 1;
         };
       };
+      values = mkOption {
+        description = "A set of values which can override the defaults";
+        type = attrs;
+        default = {};
+      };
       kubeconfig = mkOption {
         description = "Optional path to kubeconfig";
         type = str;
@@ -103,6 +108,13 @@ in {
           operator = {
             replicas = cfg.operator.replicas;
           };
+          ingressController = {
+            enabled = true;
+            loadBalancerMode = "shared";
+            l7 = {
+              backend = "envoy";
+            };
+          };
           remoteNodeIdentity = true;
           priorityClassName = "system-node-critical";
           libModulesPath = "/run/current-system/kernel-modules/lib/modules";
@@ -131,7 +143,7 @@ in {
               };
             };
           };
-        };
+        } // cfg.values;
       };
     };
   };
