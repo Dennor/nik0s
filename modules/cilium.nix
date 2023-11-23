@@ -56,94 +56,89 @@ in {
         kubeconfig = cfg.kubeconfig;
         chart = pkgs.ciliumChart;
         namespace = "kube-system";
-        values = {
-          ipam =
-            if cfg.podCIDR != null
-            then {
-              operator = {
-                clusterPoolIPv4PodCIDRList = cfg.podCIDR;
-              };
-            }
-            else {};
-          cgroup = {
-            hostRoot = "/sys/fs/cgroup";
-          };
-          bpf = {
-            masquerade = true;
-          };
-          nodePort =
-            if cfg.directRoutingDevice != null
-            then {
-              directRoutingDevice = cfg.directRoutingDevice;
-            }
-            else {};
-          authentication = {
-            mutual = {
-              spire = {
-                enabled = true;
-                install = {
+        values =
+          {
+            ipam =
+              if cfg.podCIDR != null
+              then {
+                operator = {
+                  clusterPoolIPv4PodCIDRList = cfg.podCIDR;
+                };
+              }
+              else {};
+            cgroup = {
+              hostRoot = "/sys/fs/cgroup";
+            };
+            bpf = {
+              masquerade = true;
+            };
+            nodePort =
+              if cfg.directRoutingDevice != null
+              then {
+                directRoutingDevice = cfg.directRoutingDevice;
+              }
+              else {};
+            authentication = {
+              mutual = {
+                spire = {
                   enabled = true;
-                  # Override spire images to not include digest
-                  agent = {
-                    image = "ghcr.io/spiffe/spire-agent:1.6.3";
-                  };
-                  server = {
-                    image = "ghcr.io/spiffe/spire-server:1.6.3";
+                  install = {
+                    enabled = true;
+                    # Override spire images to not include digest
+                    agent = {
+                      image = "ghcr.io/spiffe/spire-agent:1.6.3";
+                    };
+                    server = {
+                      image = "ghcr.io/spiffe/spire-server:1.6.3";
+                    };
                   };
                 };
               };
             };
-          };
-          kubeProxyReplacement = true;
-          k8sServiceHost = cfg.k8sServiceHost;
-          k8sServicePort = cfg.k8sServicePort;
-          encryption = {
-            enabled = true;
-            type = "wireguard";
-            nodeEncryption = true;
-          };
-          hostFirewall = {
-            enabled = true;
-          };
-          operator = {
-            replicas = cfg.operator.replicas;
-          };
-          ingressController = {
-            enabled = true;
-            loadBalancerMode = "shared";
-            l7 = {
-              backend = "envoy";
+            kubeProxyReplacement = true;
+            k8sServiceHost = cfg.k8sServiceHost;
+            k8sServicePort = cfg.k8sServicePort;
+            encryption = {
+              enabled = true;
+              type = "wireguard";
+              nodeEncryption = true;
             };
-          };
-          remoteNodeIdentity = true;
-          priorityClassName = "system-node-critical";
-          libModulesPath = "/run/current-system/kernel-modules/lib/modules";
-          # We're already using an airgaped bundle, do not use digest because the it seems to fail
-          inherit image;
-          certgen = {inherit image;};
-          metrics = {
-            relay = {inherit image;};
-          };
-          ui = {
-            backend = {inherit image;};
-            frontedn = {inherit image;};
-          };
-          envoy = {inherit image;};
-          etcd = {inherit image;};
-          operator = {inherit image;};
-          preflight = {inherit image;};
-          clustermesg = {
-            apiserver = {
-              inherit image;
-              etcd = {
+            hostFirewall = {
+              enabled = true;
+            };
+            operator = {
+              replicas = cfg.operator.replicas;
+            };
+            remoteNodeIdentity = true;
+            priorityClassName = "system-node-critical";
+            libModulesPath = "/run/current-system/kernel-modules/lib/modules";
+            # We're already using an airgaped bundle, do not use digest because the it seems to fail
+            inherit image;
+            certgen = {inherit image;};
+            metrics = {
+              relay = {inherit image;};
+            };
+            ui = {
+              backend = {inherit image;};
+              frontedn = {inherit image;};
+            };
+            envoy = {inherit image;};
+            etcd = {inherit image;};
+            operator = {inherit image;};
+            preflight = {inherit image;};
+            clustermesg = {
+              apiserver = {
                 inherit image;
-              };
-              kvstoremesg = {
-                inherit image;
+                etcd = {
+                  inherit image;
+                };
+                kvstoremesg = {
+                  inherit image;
+                };
               };
             };
-          };
-        } // cfg.values;
+          }
+          // cfg.values;
       };
     };
   };
