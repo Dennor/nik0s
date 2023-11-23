@@ -116,7 +116,7 @@ in {
 
       update_controller() {
         echo "updating controller node $2"
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ${flake} --target-host "root@$1"
+        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ${flake}#${nodeFQDN node} --target-host "root@$1"
         until ssh "root@$1" systemctl status k0s; do
           echo "waiting for controller to finish updating $2"
         done
