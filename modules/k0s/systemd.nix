@@ -10,6 +10,10 @@
     if cfg.cloudProvider != null
     then "--cloud-provider=${cfg.cloudProvider}"
     else ""
+  } ${
+    if cfg.nodeIp != null
+    then "--node-ip=${cfg.nodeIp}"
+    else ""
   } --hostname-override=${node_name}";
   startK0s = joinToken:
     pkgs.writeShellScript "start_k0s.sh" ''
@@ -26,7 +30,10 @@
           --kubelet-extra-args='${kubelet_args}' ''
         else ""
       }'';
-  bundles = [pkgs.k0sBundle] ++ cfg.bundles;
+  k0sBundle = if cfg.mode == "controller"
+  then []
+  else [pkgs.k0sBundle];
+  bundles = k0sBundle ++ cfg.bundles;
   mkCerts = master:
     if master != null
     then ''

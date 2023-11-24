@@ -116,8 +116,8 @@ in {
 
       update_controller() {
         echo "updating controller node $2"
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ${flake}#${nodeFQDN node} --target-host "root@$1"
-        until ssh "root@$1" systemctl status k0s; do
+        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ${flake}#$2 --target-host "root@$1"
+        until ssh -oStrictHostKeyChecking=accept-new "root@$1" systemctl status k0s; do
           echo "waiting for controller to finish updating $2"
         done
         echo "controller node $2 updated"
@@ -127,11 +127,11 @@ in {
         echo "waiting for worker node to be completely drained $2"
         # This here is on purpose done from controller node kubectl rather than local machine
         # to not have a dependency on the current system config.
-        until ssh "root@${managmentAddress}" k0s kubectl drain $2; do
+        until ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data $2; do
           echo "waiting for worker node to be completely drained $2"
         done
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake --target-gost "root@$1"
-        until ssh "root@${managmentAddress}" k0s kubectl uncordon $2; do
+        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake ${flake}#$2 --target-host "root@$1"
+        until ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl uncordon $2; do
           echo "waiting for worker node $2 to be available again"
         done
         echo "worker node $2 updated"
@@ -141,7 +141,7 @@ in {
           if node.pool.kind == "controller"
           then "update_controller"
           else "update_worker"
-        } ${nodeFQDN node} ${nodeAddress node}")
+        } ${nodeAddress node} ${nodeFQDN node}")
         nodes))}
     '';
   in

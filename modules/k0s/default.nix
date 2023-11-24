@@ -93,6 +93,11 @@ in {
       description = "Configure cloud provider for in kubelet";
       default = null;
     };
+    nodeIp = mkOption {
+      description = "Kubelete nodeIP";
+      type = str;
+      default = "";
+    };
     bundles = mkOption {
       description = "Airgap packages to include in worker node";
       type = listOf package;
