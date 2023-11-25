@@ -14,10 +14,6 @@ in {
   options = {
     k0s-cilium = with types; {
       enable = mkEnableOption "";
-      podCIDR = mkOption {
-        description = "CIDR to for pods";
-        type = nullOr (listOf str);
-      };
       k8sServiceHost = mkOption {
         description = "Kube apiserver address";
         type = str;
@@ -25,10 +21,6 @@ in {
       k8sServicePort = mkOption {
         description = "Kube apiserver port";
         type = number;
-      };
-      directRoutingDevice = mkOption {
-        type = nullOr str;
-        description = "Optional direct routing device for cilium";
       };
       operator = {
         replicas = mkOption {
@@ -58,26 +50,12 @@ in {
         namespace = "kube-system";
         values =
           {
-            ipam =
-              if cfg.podCIDR != null
-              then {
-                operator = {
-                  clusterPoolIPv4PodCIDRList = cfg.podCIDR;
-                };
-              }
-              else {};
             cgroup = {
               hostRoot = "/sys/fs/cgroup";
             };
             bpf = {
               masquerade = true;
             };
-            nodePort =
-              if cfg.directRoutingDevice != null
-              then {
-                directRoutingDevice = cfg.directRoutingDevice;
-              }
-              else {};
             authentication = {
               mutual = {
                 spire = {
