@@ -16,6 +16,7 @@
     then "--node-ip=${cfg.nodeIp}"
     else ""
   } --hostname-override=${node_name}";
+  labels = builtins.map (label: "${label}=${cfg.labels.${label}}") (builtins.attrNames cfg.labels);
   startK0s = joinToken:
     pkgs.writeShellScript "start_k0s.sh" ''
       set -e
@@ -29,6 +30,11 @@
         if (cfg.mode == "worker")
         then ''          \
           --kubelet-extra-args='${kubelet_args}' ''
+        else ""
+      } ${
+        if ((builtins.length labels) > 0)
+        then ''          \
+          --labels='${builtins.concatStringsSep "," labels}' ''
         else ""
       }'';
   k0sBundle =
