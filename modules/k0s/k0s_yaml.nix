@@ -51,6 +51,7 @@
       };
       provider = "custom";
       serviceCIDR = cfg.serviceCIDR;
+      podCIDR = cfg.podCIDR;
     };
     scheduler = {};
     storage = {

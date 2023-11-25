@@ -58,7 +58,12 @@ in {
     serviceCIDR = mkOption {
       type = str;
       description = "Service subnet";
-      default = "10.1.0.0/16";
+      default = "10.96.0.0/12";
+    };
+    podCIDR = mkOption {
+      type = str;
+      description = "Pod subnet";
+      default = "10.244.0.0/16";
     };
     master = mkOption {
       type = nullOr (submodule {
