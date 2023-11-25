@@ -4,7 +4,17 @@
   pkgs ? import <nixpkgs> {},
 }:
 with pkgs; let
-  k0s = pkgs.k0s;
+  testPackage = pkgs.stdenv.mkDerivation rec {
+    name = "test-package";
+    src = ../.;
+    phases = ["installPhase"];
+    installPhase = ''
+      set -x
+      mkdir -p $out
+      cp -r ${src}/tests/* $out
+    '';
+  };
+  k0s = pkgs.k0s_1_28_4;
   ciliumChart = pkgs.ciliumChart;
   mkTestCase = cluster: {
     name = cluster.clusterName;
@@ -84,7 +94,7 @@ with pkgs; let
                 boot = {
                   kernelPackages = pkgs.linuxPackages_6_5_hardened_bpfilter;
                 };
-                environment.systemPackages = [pkgs.cri-tools pkgs.k0s pkgs.curl];
+                environment.systemPackages = [pkgs.cri-tools pkgs.k0s pkgs.curl testPackage];
                 environment.variables = {
                   CONTAINER_RUNTIME_ENDPOINT = "unix:///run/k0s/containerd.sock";
                 };
@@ -101,11 +111,17 @@ with pkgs; let
                 };
                 k0s-cilium = {
                   enable = node.config.pool.kind == "controller";
-                  podCIDR = (podCIDR testCase) node;
                   k8sServiceHost = (apiHost testCase) node;
                   k8sServicePort = (apiPort testCase) node;
-                  directRoutingDevice = (directRoutingDevice testCase) node;
                   kubeconfig = "/var/lib/k0s/pki/admin.conf";
+                  values = {
+                    imap = {
+                      operator = {
+                        clusterPoolIPv4PodCIDRList = (podCIDR testCase) node;
+                      };
+                    };
+                    directRoutingDevice = (directRoutingDevice testCase) node;
+                  };
                 };
                 helm = (helm testCase) node;
                 services.k0s = {
@@ -119,6 +135,7 @@ with pkgs; let
                   joinToken = node.config.node.joinToken or null;
                   manifests = (manifests testCase) node;
                   bundles = [pkgs.ciliumBundle pkgs.openebsLocalPVBundle];
+                  version = "1.28.4";
                 };
                 documentation.nixos.enable = false;
               })
@@ -161,6 +178,7 @@ with pkgs; let
     makeTest (mkTest ({
         testCase = mkTestCase args.cluster;
       }
-      // args)) {inherit pkgs eval-config;};
-in
-  makeTest'
+      // args)) {
+      inherit pkgs eval-config;
+    };
+in {inherit makeTest' testPackage;}

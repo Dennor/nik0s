@@ -58,7 +58,7 @@
 
   testLib = import ../lib/test.nix {inherit makeTest eval-config pkgs;};
   auth = import ./auth.nix;
-  test = testLib {
+  test = testLib.makeTest' {
     inherit auth;
     apiHosts = [public.controller private.controller];
     cluster = {
@@ -75,8 +75,8 @@
                     ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
                     ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
                     ### SOPS OR SOME SUCH
-                    key = ./ca.key;
-                    crt = ./ca.crt;
+                    key = "${testLib.testPackage}/ca.key";
+                    crt = "${testLib.testPackage}/ca.crt";
                   };
                 };
               };
@@ -91,7 +91,7 @@
               ### PLEASE DO NOT DO THIS! THIS IS INSECURE AND IT'S ONLY HERE FOR TESTING
               ### IN REAL WORLD THIS SHOULD BE AN ABSOLUTE PATH TO A SECRET CREATED BY FOR EXAMPLE
               ### SOPS OR SOME SUCH
-              joinToken = ./token_${auth.worker.id}.${auth.worker.secret};
+              joinToken = "${testLib.testPackage}/token_${auth.worker.id}.${auth.worker.secret}";
             };
           };
         };

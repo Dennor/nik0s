@@ -5,6 +5,7 @@
   cfg,
   ...
 }: let
+  k0sVersionSuffix = "_${builtins.replaceStrings ["."] ["_"] cfg.version}";
   node_name = "${config.networking.hostName}.${config.networking.domain}";
   kubelet_args = "${
     if cfg.cloudProvider != null
@@ -19,7 +20,7 @@
     pkgs.writeShellScript "start_k0s.sh" ''
       set -e
 
-      ${pkgs.k0s}/bin/k0s ${cfg.mode} \
+      ${pkgs."k0s${k0sVersionSuffix}"}/bin/k0s ${cfg.mode} \
         ${
         if joinToken != null
         then "--token-file=/etc/k0s/token-file"
@@ -33,7 +34,7 @@
   k0sBundle =
     if cfg.mode == "controller"
     then []
-    else [pkgs.k0sBundle];
+    else [pkgs."k0s_bundle${k0sVersionSuffix}"];
   bundles = k0sBundle ++ cfg.bundles;
   mkCerts = master:
     if master != null
@@ -93,7 +94,7 @@ in {
       lib.forEach bundles (bundle: "for img in ${bundle}/*; do import $img; done")
     )}
   '';
-  path = [pkgs.k0s pkgs.mount pkgs.util-linux pkgs.kmod];
+  path = [pkgs."k0s${k0sVersionSuffix}" pkgs.mount pkgs.util-linux pkgs.kmod];
   wants = ["network-online.target"];
   documentation = ["https://docs.k0sproject.io"];
   description = "k0s - Zero Friction Kubernetes";
@@ -103,7 +104,7 @@ in {
   script = "${startK0s cfg.joinToken}";
   wantedBy = ["default.target"];
   unitConfig = {
-    ConditionFileIsExecutable = "${pkgs.k0s}/bin/k0s";
+    ConditionFileIsExecutable = "${pkgs."k0s${k0sVersionSuffix}"}/bin/k0s";
   };
   serviceConfig = {
     RestartSec = 120;
