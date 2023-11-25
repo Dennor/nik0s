@@ -108,6 +108,11 @@ in {
       type = listOf package;
       default = [];
     };
+    spec = mkOption {
+      description = "An additional configuration for k0s that will update the default values for spec. Refer to https://docs.k0sproject.io/v1.28.4+k0s.0/configuration/#spec-key-detail";
+      type = attrs;
+      default = {};
+    };
   };
 
   config = mkIf cfg.enable {

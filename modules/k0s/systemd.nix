@@ -30,9 +30,10 @@
           --kubelet-extra-args='${kubelet_args}' ''
         else ""
       }'';
-  k0sBundle = if cfg.mode == "controller"
-  then []
-  else [pkgs.k0sBundle];
+  k0sBundle =
+    if cfg.mode == "controller"
+    then []
+    else [pkgs.k0sBundle];
   bundles = k0sBundle ++ cfg.bundles;
   mkCerts = master:
     if master != null
