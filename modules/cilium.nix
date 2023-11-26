@@ -61,6 +61,8 @@ in {
       "ip_set_hash_ip"
       "sch_fq"
       "wireguard"
+      "nft_chain_nat"
+      "cls_bpf"
     ];
     helm = mkIf (kind == "controller") {
       cilium = {
