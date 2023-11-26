@@ -94,6 +94,7 @@ in {
       RestartSec = 5;
       Restart = "on-failure";
       Type = "oneshot";
+      RemainAfterExit = "yes";
     };
     wantedBy = ["default.target"];
     script = "${startRelease}";
