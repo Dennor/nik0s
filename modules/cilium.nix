@@ -29,6 +29,11 @@ in {
           default = 1;
         };
       };
+      spire = mkOption {
+        description = "Enable spire authentication";
+        type = bool;
+        default = false;
+      };
       values = mkOption {
         description = "A set of values which can override the defaults";
         type = attrs;
@@ -59,9 +64,8 @@ in {
             authentication = {
               mutual = {
                 spire = {
-                  enabled = true;
+                  enabled = cfg.spire;
                   install = {
-                    enabled = true;
                     # Override spire images to not include digest
                     agent = {
                       image = "ghcr.io/spiffe/spire-agent:1.6.3";
