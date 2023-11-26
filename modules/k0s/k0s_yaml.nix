@@ -12,10 +12,7 @@
     {
       api =
         {
-          address = cfg.api.address;
-          k0sApiPort = cfg.api.k0sApiPort;
-          port = cfg.api.port;
-          sans = cfg.api.sans;
+          inherit (cfg.api) address k0sApiPort port sans extraArgs;
         }
         // (
           if cfg.api.externalAddress != ""

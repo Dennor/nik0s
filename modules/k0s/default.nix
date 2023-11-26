@@ -40,6 +40,11 @@ in {
         description = "List of additional addresses to push to API servers serving the certificate.";
         default = [];
       };
+      extraArgs = mkOption {
+        description = "Extra arguments to pass to kube-apiserver";
+        type = attrsOf str;
+        default = {};
+      };
     };
     storage = {
       etcd = {
