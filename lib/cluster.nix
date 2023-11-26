@@ -48,14 +48,17 @@ with pkgs.lib; let
   nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
   nodeConfig = node: removeListedAttrs node ["pool" "node"];
   yaml = pkgs.formats.yaml {};
-  mkManifestFile = name: manifests: pkgs.writeText name ''
-    ${builtins.concatStringsSep "" (builtins.map (manifest: let
-      manifestFile = if builtins.isPath manifest
-      then manifest
-      else yaml.generate "manifest.yaml" manifest;
-    in ''
-      ---
-      ${builtins.readFile manifestFile}'') manifests)}'';
+  mkManifestFile = name: manifests:
+    pkgs.writeText name ''
+      ${builtins.concatStringsSep "" (builtins.map (manifest: let
+        manifestFile =
+          if builtins.isPath manifest
+          then manifest
+          else yaml.generate "manifest.yaml" manifest;
+      in ''
+        ---
+        ${builtins.readFile manifestFile}'')
+      manifests)}'';
 in {
   inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig mkManifestFile;
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
@@ -135,8 +138,8 @@ in {
       }
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
-        if [[ "$*" == *"${nodeFQDN node}"* ]]; then
-          ${let
+          if [[ "$*" == *"${nodeFQDN node}"* ]]; then
+            ${let
             script =
               if node.pool.kind == "controller"
               then controllerScript
@@ -145,11 +148,11 @@ in {
             if script != null
             then "nodeScript ${nodeFQDN node} ${script}"
             else ""}
-          EXTRA_ARGS=""
-          if [ -d "$tmpdir/${nodeFQDN node}" ]; then
-            EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
-          fi
-          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
+            EXTRA_ARGS=""
+            if [ -d "$tmpdir/${nodeFQDN node}" ]; then
+              EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
+            fi
+            ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
         '')
         nodes))}
 
