@@ -47,6 +47,22 @@ in {
     };
   };
   config = mkIf cfg.enable {
+    boot = mkIf (config.cluster.pools.${config.cluster.machine.pool}.kind == "worker") {
+      kernelModules = [
+        "xt_socket"
+        "xt_mark"
+        "xt_set"
+        "xt_TPROXY"
+        "xt_CT"
+        "sch_ingress"
+        "sha1-ssse3"
+        "algif_hash"
+        "ip_set"
+        "ip_set_hash_ip"
+        "sch_fq"
+        "wireguard"
+      ];
+    };
     helm = {
       cilium = {
         enable = true;
