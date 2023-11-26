@@ -198,6 +198,11 @@ with types; let
         description = "Node join token";
         default = null;
       };
+      labels = mkOption {
+        description = "Set of labels to add to node. Applies only for worker nodes.";
+        type = attrsOf str;
+        default = {};
+      };
     };
   };
   pool = submodule {
