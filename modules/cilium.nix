@@ -10,6 +10,7 @@ with lib; let
   image = {
     useDigest = false;
   };
+  kind = config.cluster.pools.${config.cluster.machine.pool}.kind;
 in {
   options = {
     k0s-cilium = with types; {
@@ -47,23 +48,21 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    boot = mkIf (config.cluster.pools.${config.cluster.machine.pool}.kind == "worker") {
-      kernelModules = [
-        "xt_socket"
-        "xt_mark"
-        "xt_set"
-        "xt_TPROXY"
-        "xt_CT"
-        "sch_ingress"
-        "sha1-ssse3"
-        "algif_hash"
-        "ip_set"
-        "ip_set_hash_ip"
-        "sch_fq"
-        "wireguard"
-      ];
-    };
-    helm = {
+    boot.kernelModules = mkIf (kind == "worker") [
+      "xt_socket"
+      "xt_mark"
+      "xt_set"
+      "xt_TPROXY"
+      "xt_CT"
+      "sch_ingress"
+      "sha1-ssse3"
+      "algif_hash"
+      "ip_set"
+      "ip_set_hash_ip"
+      "sch_fq"
+      "wireguard"
+    ];
+    helm = mkIf (kind == "controller") {
       cilium = {
         enable = true;
         kubeconfig = cfg.kubeconfig;
