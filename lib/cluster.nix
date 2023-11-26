@@ -47,8 +47,17 @@ with pkgs.lib; let
   nodeFQDN = node: "${node.machine.node}.${node.machine.pool}.${node.name}";
   nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
   nodeConfig = node: removeListedAttrs node ["pool" "node"];
+  yaml = pkgs.formats.yaml {};
+  mkManifestFile = name: manifests: pkgs.writeText name ''
+    ${builtins.concatStringsSep "" (builtins.map (manifest: let
+      manifestFile = if builtins.isPath manifest
+      then manifest
+      else yaml.generate "manifest.yaml" manifest;
+    in ''
+      ---
+      ${builtins.readFile manifestFile}'') manifests)}'';
 in {
-  inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig;
+  inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig mkManifestFile;
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
     flake,
