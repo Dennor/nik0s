@@ -63,6 +63,18 @@ in {
       "wireguard"
       "nft_chain_nat"
       "cls_bpf"
+      "veth"
+      "xfrm_algo"
+      "xfrm_user"
+      "ip6table_filter"
+      "ip6table_mangle"
+      "ip6table_raw"
+      "ip6_tables"
+      "iptable_filter"
+      "iptable_mangle"
+      "iptable_nat"
+      "iptable_raw"
+      "ip_tables"
     ];
     helm = mkIf (kind == "controller") {
       cilium = {
