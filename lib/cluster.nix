@@ -160,7 +160,7 @@ in {
   in
     pkgs.stdenv.mkDerivation {
       src = flake;
-      name = "install-${cluster.name}";
+      name = "install-node-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
         cp ${installScript} $out/bin/install-${cluster.name}
@@ -277,7 +277,7 @@ in {
   in
     pkgs.stdenv.mkDerivation {
       src = flake;
-      name = "update-${cluster.name}";
+      name = "update-soft-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
         cp ${updateScript} $out/bin/update-${cluster.name}
@@ -321,7 +321,7 @@ in {
   in
     pkgs.stdenv.mkDerivation {
       src = flake;
-      name = "update-${cluster.name}";
+      name = "update-config-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
         cp ${updateScript} $out/bin/update-${cluster.name}
