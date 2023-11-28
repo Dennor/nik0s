@@ -1,0 +1,322 @@
+{
+  "apiHost": "1.1.1.1",
+  "apiPort": 6443,
+  "name": "test-cluster",
+  "pools": {
+    "controllers-0": {
+      "kind": "controller",
+      "nodes": {
+        "controller-0": {
+          "joinToken": null,
+          "labels": {},
+          "master": {
+            "ca": {
+              "/var/lib/k0s/pki/ca": {
+                "crt": "/run/secrets/ca.crt",
+                "key": "/run/secrets/ca.key"
+              }
+            }
+          },
+          "network": {
+            "private": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "10.0.0.2",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "10.0.0.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "10.0.0.0",
+                    "options": {},
+                    "prefixLength": 8,
+                    "type": null,
+                    "via": "10.0.0.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp2s0",
+              "vlan": null
+            },
+            "public": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "1.1.1.1",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "172.31.1.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "0.0.0.0",
+                    "options": {},
+                    "prefixLength": 0,
+                    "type": null,
+                    "via": "172.31.1.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp1s0",
+              "vlan": null
+            }
+          }
+        }
+      }
+    },
+    "workers-0": {
+      "kind": "worker",
+      "nodes": {
+        "worker-0": {
+          "joinToken": "/run/secrets/jointoken",
+          "labels": {
+            "openebs.io/engine": "mayastor"
+          },
+          "master": null,
+          "network": {
+            "private": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "10.0.0.3",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "10.0.0.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "10.0.0.0",
+                    "options": {},
+                    "prefixLength": 8,
+                    "type": null,
+                    "via": "10.0.0.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp2s0",
+              "vlan": null
+            },
+            "public": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "2.2.2.2",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "172.31.1.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "0.0.0.0",
+                    "options": {},
+                    "prefixLength": 0,
+                    "type": null,
+                    "via": "172.31.1.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp1s0",
+              "vlan": null
+            }
+          }
+        },
+        "worker-1": {
+          "joinToken": "/run/secrets/jointoken",
+          "labels": {
+            "openebs.io/engine": "mayastor"
+          },
+          "master": null,
+          "network": {
+            "private": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "10.0.0.4",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "10.0.0.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "10.0.0.0",
+                    "options": {},
+                    "prefixLength": 8,
+                    "type": null,
+                    "via": "10.0.0.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp2s0",
+              "vlan": null
+            },
+            "public": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "3.3.3.3",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "172.31.1.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "0.0.0.0",
+                    "options": {},
+                    "prefixLength": 0,
+                    "type": null,
+                    "via": "172.31.1.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp1s0",
+              "vlan": null
+            }
+          }
+        },
+        "worker-2": {
+          "joinToken": "/run/secrets/jointoken",
+          "labels": {
+            "openebs.io/engine": "mayastor"
+          },
+          "master": null,
+          "network": {
+            "private": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "10.0.0.5",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "10.0.0.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "10.0.0.0",
+                    "options": {},
+                    "prefixLength": 8,
+                    "type": null,
+                    "via": "10.0.0.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp2s0",
+              "vlan": null
+            },
+            "public": {
+              "dhcp": null,
+              "ipv4": {
+                "addresses": [
+                  {
+                    "address": "4.4.4.4",
+                    "prefixLength": 32
+                  }
+                ],
+                "routes": [
+                  {
+                    "address": "172.31.1.1",
+                    "options": {},
+                    "prefixLength": 32,
+                    "type": null,
+                    "via": null
+                  },
+                  {
+                    "address": "0.0.0.0",
+                    "options": {},
+                    "prefixLength": 0,
+                    "type": null,
+                    "via": "172.31.1.1"
+                  }
+                ]
+              },
+              "ipv6": {
+                "addresses": [],
+                "routes": []
+              },
+              "link": "enp1s0",
+              "vlan": null
+            }
+          }
+        }
+      }
+    }
+  }
+}
