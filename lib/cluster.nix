@@ -164,8 +164,8 @@ in {
       name = "install-node-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
-        cp ${installScript} $out/bin/install-${cluster.name}
-        chmod +x $out/bin/install-${cluster.name}
+        cp ${installScript} $out/bin/install-node-${cluster.name}
+        chmod +x $out/bin/install-node-${cluster.name}
       '';
     };
   mkUpdateScript = {
@@ -278,11 +278,11 @@ in {
   in
     pkgs.stdenv.mkDerivation {
       src = flake;
-      name = "update-soft-${cluster.name}";
+      name = "soft-update-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
-        cp ${updateScript} $out/bin/update-${cluster.name}
-        chmod +x $out/bin/update-${cluster.name}
+        cp ${updateScript} $out/bin/soft-update-${cluster.name}
+        chmod +x $out/bin/soft-update-${cluster.name}
       '';
     };
   # Update configuration without cordoning and rebooting nodes
@@ -322,11 +322,11 @@ in {
   in
     pkgs.stdenv.mkDerivation {
       src = flake;
-      name = "update-config-${cluster.name}";
+      name = "config-update-${cluster.name}";
       installPhase = ''
         mkdir -p $out/bin
-        cp ${updateScript} $out/bin/update-${cluster.name}
-        chmod +x $out/bin/update-${cluster.name}
+        cp ${updateScript} $out/bin/config-update-${cluster.name}
+        chmod +x $out/bin/config-update-${cluster.name}
       '';
     };
 }
