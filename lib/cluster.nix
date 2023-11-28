@@ -121,7 +121,7 @@ in {
     controllerScript ? null,
   }: let
     nodes = clusterNodes cluster;
-    installScript = pkgs.writeShellScript "install_cluster.sh" ''
+    installScript = pkgs.writeShellScript "install_node.sh" ''
       set -e
 
       tmpdir=$(mktemp -d)
@@ -153,6 +153,7 @@ in {
               EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
             fi
             ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
+          fi
         '')
         nodes))}
 
@@ -240,7 +241,7 @@ in {
     workers = workerNodes cluster;
     nodes = controllers ++ workers;
     managmentAddress = nodeAddress (builtins.elemAt controllers 0);
-    updateScript = pkgs.writeShellScript "update_cluster.sh" ''
+    updateScript = pkgs.writeShellScript "soft_update_cluster.sh" ''
       set -e
 
       update_controller() {
@@ -294,7 +295,7 @@ in {
     workers = workerNodes cluster;
     nodes = controllers ++ workers;
     managmentAddress = nodeAddress (builtins.elemAt controllers 0);
-    updateScript = pkgs.writeShellScript "update_cluster.sh" ''
+    updateScript = pkgs.writeShellScript "config_update_cluster.sh" ''
       set -e
 
       update_controller() {
