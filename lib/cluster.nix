@@ -1,8 +1,29 @@
 {pkgs}:
 with pkgs.lib; let
+  /*
+    Removes names in list from attribute set
+
+    removeListedAttrs :: AttrSet -> [String] -> AttrSet
+  */
   removeListedAttrs = attrs: removeNames: filterAttrs (name: _: ((builtins.any (v: v == name) removeNames) == false)) attrs;
+
+  /*
+    Creates new attribute set containing only listed attributes.
+
+    keepListedAttrs :: AttrSet -> [String] -> AttrSet
+  */
   keepListedAttrs = attrs: keepNames: filterAttrs (name: _: (builtins.any (v: v == name) keepNames)) attrs;
+
+  /*
+    A list of cluster options
+  */
   clusterFields = builtins.attrNames (import ./cluster_opts.nix {inherit (pkgs) lib;});
+
+  /*
+    Verifies if attribute set matches required cluster options.
+
+    checkCluster :: AttrSet -> AttrSet
+  */
   checkCluster = cluster:
     (evalModules {
       modules = [
@@ -16,6 +37,12 @@ with pkgs.lib; let
     })
     .config
     .cluster;
+
+  /*
+    Returns cluster nodes of specific kind. If kind is null, returns all cluster nodes.
+
+    clusterNodesByKind :: String -> AttrSet -> [String]
+  */
   clusterNodesByKind = kind: cluster:
     builtins.concatLists (
       builtins.attrValues (
@@ -41,13 +68,56 @@ with pkgs.lib; let
         (checkCluster cluster).pools
       )
     );
+
+  /*
+    Returns all cluster nodes.
+
+    clusterNodes :: AttrSet -> [String]
+  */
   clusterNodes = clusterNodesByKind null;
+
+  /*
+    Returns all cluster controller nodes.
+
+    controllerNodes :: AttrSet -> [String]
+  */
   controllerNodes = clusterNodesByKind "controller";
+
+  /*
+    Returns all cluster worker nodes.
+
+    workerNodes :: AttrSet -> [String]
+  */
   workerNodes = clusterNodesByKind "worker";
+
+  /*
+    Returns a fully qualified domain name for the configured cluster node
+
+    nodeFQDN :: AttrSet -> String
+  */
   nodeFQDN = node: "${node.machine.node}.${node.machine.pool}.${node.name}";
+
+  /*
+    Returns node IPv4 public address.
+
+    nodeAddress :: AttrSet -> String
+  */
   nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
+
+  /*
+    Cleans up node config by removing pool and node attributes
+
+    nodeConfig :: AttrSet -> AttrSet
+  */
   nodeConfig = node: removeListedAttrs node ["pool" "node"];
   yaml = pkgs.formats.yaml {};
+
+  /*
+    Creates a text file derivation build from a list of manifests. Manifests can be either
+    a path to a valid yaml file or an attribute set.
+
+    mkManifestFile :: String -> [AttrSet | path] -> Derivation
+  */
   mkManifestFile = name: manifests:
     pkgs.writeText name ''
       ${builtins.concatStringsSep "" (builtins.map (manifest: let
@@ -61,6 +131,12 @@ with pkgs.lib; let
       manifests)}'';
 in {
   inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig mkManifestFile;
+
+  /*
+    Creates a json derivation with cluster config.
+
+    mkCluster :: AttrSet -> derivation
+  */
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
     flake,

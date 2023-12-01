@@ -228,10 +228,10 @@ in {
   };
   apiHost = mkOption {
     type = str;
-    description = "Kube apiserver host";
+    description = "Kube apiserver host address";
   };
   apiPort = mkOption {
     type = number;
-    description = "Kube apiserver number";
+    description = "Kube apiserver port number";
   };
 }

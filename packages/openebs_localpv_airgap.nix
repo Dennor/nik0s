@@ -13,7 +13,6 @@ in
         finalImageTag = "3.4.0";
         sha256 = "0srlhzk9wvqznsa4y9xvvnnv1v9krk5b8rjwhddd9aqkq2dnmg70";
         os = "linux";
-        arch = "x86_64";
       }
       {
         imageName = "openebs/node-disk-operator";
