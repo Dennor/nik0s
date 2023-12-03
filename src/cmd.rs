@@ -1,5 +1,7 @@
 mod error;
 mod install;
+use std::net::IpAddr;
+
 use clap::{Args, Parser, Subcommand};
 pub use error::*;
 pub use install::*;
@@ -16,31 +18,38 @@ pub struct Cli {
 pub struct ClusterArgs {}
 
 #[derive(Debug, Args)]
-#[command(args_conflicts_with_subcommands = true)]
+#[command(arg_required_else_help = true)]
 #[command(flatten_help = true)]
 pub struct InstallArgs {
     #[command(subcommand)]
     pub command: Option<InstallCommands>,
-
-    #[command(flatten)]
-    pub cluster: ClusterArgs,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum InstallCommands {
     /// Install whole cluster.
-    Cluster,
+    Cluster { flake: String },
     /// Install a pool.
     #[command(arg_required_else_help = true)]
-    Pool { pool: String },
+    Pool { flake: String, pool: String },
     /// Install a node.
     #[command(arg_required_else_help = true)]
-    Node { node: String },
+    Node {
+        flake: String,
+        pool: String,
+        node: String,
+    },
+    /// Install a specific configuration from a flake.
+    #[command(arg_required_else_help = true)]
+    NixosConfiguration {
+        nixos_configuration: String,
+        target: IpAddr,
+    },
 }
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// Install commands. By default install whole cluster. Warning, this destroys existing data on
+    /// Install commands. Warning, commands here destroy existing data on
     /// targets.
     Install(InstallArgs),
 }

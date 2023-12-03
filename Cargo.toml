@@ -7,6 +7,11 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.4.10", features = ["derive"] }
+libssh-rs = { version = "0.2.2", features = ["vendored", "vendored-openssl"] }
+pretty_assertions = "1.4.0"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = "1.0.108"
+shell-quote = "0.5.0"
+sysinfo = "0.29.11"
 tempfile = "3.8.1"
+which = "5.0.0"
