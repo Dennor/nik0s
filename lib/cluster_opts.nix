@@ -155,6 +155,14 @@ with types; let
         type = ipvx 6;
         default = {};
       };
+      mtu = mkOption {
+        default = null;
+        example = 9000;
+        type = types.nullOr types.int;
+        description = lib.mdDoc ''
+          MTU size for packets leaving the interface. Leave empty to use the default.
+        '';
+      };
     };
   };
   network = {
