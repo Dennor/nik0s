@@ -158,14 +158,14 @@ in {
       nodeScript() {
         mkdir -p "$tmpdir/$1/extra-files"
         pushd "$tmpdir/$1/extra-files" > /dev/null
-        $2
+        $2 "$1"
         popd > /dev/null
       }
 
       encryptionKeys() {
         mkdir -p "$tmpdir/$1/keys"
         pushd "$tmpdir/$1/keys" > /dev/null
-        $2
+        $2 "$1"
         popd > /dev/null
       }
 
