@@ -195,7 +195,6 @@ in {
             do
               src="$(readlink -m "$tmpdir/${nodeFQDN node}/keys/$file")"
               dst="$(readlink -m "/$file")"
-              ssh -oStrictHostKeyChecking=accept-new root@${nodeAddress node} mkdir -p "$(dirname "$dst")"
               EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
             done <   <(find . -type f -print0)
             popd > /dev/null
