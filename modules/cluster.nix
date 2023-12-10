@@ -40,7 +40,6 @@ in {
           enable = true;
         };
         vlans = publicVLAN // privateVLAN;
-        nameservers = ["1.1.1.1" "1.0.0.1"];
         interfaces = {
           ${public.link} = {
             useDHCP = public.dhcp == true;

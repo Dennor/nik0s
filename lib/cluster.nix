@@ -141,6 +141,7 @@ in {
   mkInstallScript = {
     flake,
     cluster,
+    encryptionKeyScripts ? null,
     workerScript ? null,
     controllerScript ? null,
   }: let
@@ -155,8 +156,15 @@ in {
       trap cleanup EXIT
 
       nodeScript() {
-        mkdir -p $tmpdir/$1
-        pushd $tmpdir/$1 > /dev/null
+        mkdir -p "$tmpdir/$1/extra-files"
+        pushd "$tmpdir/$1/extra-files" > /dev/null
+        $2
+        popd > /dev/null
+      }
+
+      encryptionKeys() {
+        mkdir -p "$tmpdir/$1/keys"
+        pushd "$tmpdir/$1/keys" > /dev/null
         $2
         popd > /dev/null
       }
@@ -172,8 +180,25 @@ in {
             then "nodeScript ${nodeFQDN node} ${script}"
             else ""}
           EXTRA_ARGS=""
-          if [ -d "$tmpdir/${nodeFQDN node}" ]; then
-            EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
+          if [ -d "$tmpdir/${nodeFQDN node}/extra-files" ]; then
+            EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}/extra-files"
+          fi
+          ${let
+            script = encryptionKeyScripts."${nodeFQDN node}" or null;
+          in
+            if script != null
+            then "encryptionKeys ${nodeFQDN node} ${script}"
+            else ""}
+          if [ -d "$tmpdir/${nodeFQDN node}/keys" ]; then
+            pushd "$tmpdir/${nodeFQDN node}/keys" > /dev/null
+            while IFS= read -r -d ''\'' file
+            do
+              src="$(readlink -m "$tmpdir/${nodeFQDN node}/keys/$file")"
+              dst="$(readlink -m "/$file")"
+              ssh -oStrictHostKeyChecking=accept-new root@${nodeAddress node} mkdir -p "$(dirname "$dst")"
+              EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
+            done <   <(find . -type f -print0)
+            popd > /dev/null
           fi
           ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
         '')
