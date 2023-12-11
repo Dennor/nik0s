@@ -127,6 +127,11 @@ in {
       description = "k0s package version. This is required argument to make sure that there's no accidental update. It should be one of k0s versions in packages without the +k0s suffix. This flake will only support 4 latest k0s minor versions starting from 1.28.3.";
       type = str;
     };
+    airgap = mkOption {
+      type = bool;
+      description = "If true, will bundle k0s images";
+      default = false;
+    };
   };
 
   config = mkIf cfg.enable {
