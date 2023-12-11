@@ -171,24 +171,17 @@ in {
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
           ${let
-            script =
-              if node.pool.kind == "controller"
-              then controllerScript
-              else workerScript;
-          in
-            if script != null
-            then "nodeScript ${nodeFQDN node} ${script}"
-            else ""}
+              script = if node.pool.kind == "controller" then controllerScript else  workerScript;
+            in optionalString (script != null) "nodeScript ${nodeFQDN node} ${script}"
+          }
           EXTRA_ARGS=""
           if [ -d "$tmpdir/${nodeFQDN node}/extra-files" ]; then
             EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}/extra-files"
           fi
           ${let
-            script = encryptionKeyScripts."${nodeFQDN node}" or null;
-          in
-            if script != null
-            then "encryptionKeys ${nodeFQDN node} ${script}"
-            else ""}
+              script = encryptionKeyScripts."${nodeFQDN node}" or null;
+            in optionalString (script != null) "encryptionKeys ${nodeFQDN node} ${script}"
+          }
           if [ -d "$tmpdir/${nodeFQDN node}/keys" ]; then
             pushd "$tmpdir/${nodeFQDN node}/keys" > /dev/null
             while IFS= read -r -d ''\'' file
@@ -217,6 +210,7 @@ in {
   mkNodeInstallScript = {
     flake,
     cluster,
+    encryptionKeyScripts ? null,
     workerScript ? null,
     controllerScript ? null,
   }: let
@@ -231,8 +225,8 @@ in {
       trap cleanup EXIT
 
       nodeScript() {
-        mkdir -p $tmpdir/$1
-        pushd $tmpdir/$1 > /dev/null
+        mkdir -p $tmpdir/$1/extra-files
+        pushd $tmpdir/$1/extra-files > /dev/null
         $2 "$1"
         popd > /dev/null
       }
@@ -247,24 +241,17 @@ in {
       ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
           if [[ "$*" == *"${nodeFQDN node}"* ]]; then
             ${let
-            script =
-              if node.pool.kind == "controller"
-              then controllerScript
-              else workerScript;
-          in
-            if script != null
-            then "nodeScript ${nodeFQDN node} ${script}"
-            else ""}
+                script = if node.pool.kind == "controller" then controllerScript else  workerScript;
+              in optionalString (script != null) "nodeScript ${nodeFQDN node} ${script}"
+            }
             EXTRA_ARGS=""
-            if [ -d "$tmpdir/${nodeFQDN node}" ]; then
-              EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}"
+            if [ -d "$tmpdir/${nodeFQDN node}/extra-files" ]; then
+              EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}/extra-files"
             fi
             ${let
-              script = encryptionKeyScripts."${nodeFQDN node}" or null;
-            in
-              if script != null
-              then "encryptionKeys ${nodeFQDN node} ${script}"
-              else ""}
+                script = encryptionKeyScripts."${nodeFQDN node}" or null;
+              in optionalString (script != null) "encryptionKeys ${nodeFQDN node} ${script}"
+            }
             if [ -d "$tmpdir/${nodeFQDN node}/keys" ]; then
               pushd "$tmpdir/${nodeFQDN node}/keys" > /dev/null
               while IFS= read -r -d ''\'' file

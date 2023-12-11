@@ -38,7 +38,7 @@
         else ""
       }'';
   k0sBundle =
-    if cfg.mode == "controller"
+    if (cfg.mode == "controller" || !cfg.airgap)
     then []
     else [pkgs."k0s_bundle${k0sVersionSuffix}"];
   bundles = k0sBundle ++ cfg.bundles;
