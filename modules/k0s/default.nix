@@ -136,7 +136,7 @@ in {
 
   config = mkIf cfg.enable {
     boot.kernel.sysctl."net.bridge.bridge-nf-call-iptables" = mkDefault 1;
-    boot.kernelModules = ["br_netfilter" "nf_conntrack" "ip_tables"];
+    boot.kernelModules = ["br_netfilter" "nf_conntrack" "ip_tables" "overlay"];
     environment.variables = {
       CONTAINER_RUNTIME_ENDPOINT = "unix:///run/k0s/containerd.sock";
     };

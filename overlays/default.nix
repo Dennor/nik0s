@@ -10,6 +10,7 @@ final: prev:
         BPFILTER = yes;
         FPROBE = yes;
         FUNCTION_ERROR_INJECTION = yes;
+        PREEMPT_NONE = yes;
       };
       ignoreConfigErrors = true;
     });

@@ -1,28 +1,28 @@
 {pkgs}:
 with pkgs.lib; let
   /*
-    Removes names in list from attribute set
+  Removes names in list from attribute set
 
-    removeListedAttrs :: AttrSet -> [String] -> AttrSet
+  removeListedAttrs :: AttrSet -> [String] -> AttrSet
   */
   removeListedAttrs = attrs: removeNames: filterAttrs (name: _: ((builtins.any (v: v == name) removeNames) == false)) attrs;
 
   /*
-    Creates new attribute set containing only listed attributes.
+  Creates new attribute set containing only listed attributes.
 
-    keepListedAttrs :: AttrSet -> [String] -> AttrSet
+  keepListedAttrs :: AttrSet -> [String] -> AttrSet
   */
   keepListedAttrs = attrs: keepNames: filterAttrs (name: _: (builtins.any (v: v == name) keepNames)) attrs;
 
   /*
-    A list of cluster options
+  A list of cluster options
   */
   clusterFields = builtins.attrNames (import ./cluster_opts.nix {inherit (pkgs) lib;});
 
   /*
-    Verifies if attribute set matches required cluster options.
+  Verifies if attribute set matches required cluster options.
 
-    checkCluster :: AttrSet -> AttrSet
+  checkCluster :: AttrSet -> AttrSet
   */
   checkCluster = cluster:
     (evalModules {
@@ -39,9 +39,9 @@ with pkgs.lib; let
     .cluster;
 
   /*
-    Returns cluster nodes of specific kind. If kind is null, returns all cluster nodes.
+  Returns cluster nodes of specific kind. If kind is null, returns all cluster nodes.
 
-    clusterNodesByKind :: String -> AttrSet -> [String]
+  clusterNodesByKind :: String -> AttrSet -> [String]
   */
   clusterNodesByKind = kind: cluster:
     builtins.concatLists (
@@ -70,53 +70,53 @@ with pkgs.lib; let
     );
 
   /*
-    Returns all cluster nodes.
+  Returns all cluster nodes.
 
-    clusterNodes :: AttrSet -> [String]
+  clusterNodes :: AttrSet -> [String]
   */
   clusterNodes = clusterNodesByKind null;
 
   /*
-    Returns all cluster controller nodes.
+  Returns all cluster controller nodes.
 
-    controllerNodes :: AttrSet -> [String]
+  controllerNodes :: AttrSet -> [String]
   */
   controllerNodes = clusterNodesByKind "controller";
 
   /*
-    Returns all cluster worker nodes.
+  Returns all cluster worker nodes.
 
-    workerNodes :: AttrSet -> [String]
+  workerNodes :: AttrSet -> [String]
   */
   workerNodes = clusterNodesByKind "worker";
 
   /*
-    Returns a fully qualified domain name for the configured cluster node
+  Returns a fully qualified domain name for the configured cluster node
 
-    nodeFQDN :: AttrSet -> String
+  nodeFQDN :: AttrSet -> String
   */
   nodeFQDN = node: "${node.machine.node}.${node.machine.pool}.${node.name}";
 
   /*
-    Returns node IPv4 public address.
+  Returns node IPv4 public address.
 
-    nodeAddress :: AttrSet -> String
+  nodeAddress :: AttrSet -> String
   */
   nodeAddress = node: (builtins.elemAt node.node.network.public.ipv4.addresses 0).address;
 
   /*
-    Cleans up node config by removing pool and node attributes
+  Cleans up node config by removing pool and node attributes
 
-    nodeConfig :: AttrSet -> AttrSet
+  nodeConfig :: AttrSet -> AttrSet
   */
   nodeConfig = node: removeListedAttrs node ["pool" "node"];
   yaml = pkgs.formats.yaml {};
 
   /*
-    Creates a text file derivation build from a list of manifests. Manifests can be either
-    a path to a valid yaml file or an attribute set.
+  Creates a text file derivation build from a list of manifests. Manifests can be either
+  a path to a valid yaml file or an attribute set.
 
-    mkManifestFile :: String -> [AttrSet | path] -> Derivation
+  mkManifestFile :: String -> [AttrSet | path] -> Derivation
   */
   mkManifestFile = name: manifests:
     pkgs.writeText name ''
@@ -133,9 +133,9 @@ in {
   inherit clusterNodes controllerNodes workerNodes nodeFQDN nodeAddress nodeConfig mkManifestFile;
 
   /*
-    Creates a json derivation with cluster config.
+  Creates a json derivation with cluster config.
 
-    mkCluster :: AttrSet -> derivation
+  mkCluster :: AttrSet -> derivation
   */
   mkCluster = cluster: (pkgs.formats.json {}).generate "cluster.json" (checkCluster cluster);
   mkInstallScript = {
@@ -169,30 +169,34 @@ in {
         popd > /dev/null
       }
 
-      ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
-          ${let
-              script = if node.pool.kind == "controller" then controllerScript else  workerScript;
-            in optionalString (script != null) "nodeScript ${nodeFQDN node} ${script}"
-          }
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: let
+          fqdn = nodeFQDN node;
+          nodeScript =
+            if node.pool.kind == "controller"
+            then controllerScript
+            else workerScript;
+          nodeLine = optionalString (nodeScript != null) "nodeScript ${fqdn} ${nodeScript}";
+          keyScript = encryptionKeyScripts."${fqdn}" or null;
+          keyLine = optionalString (keyScript != null) "encryptionKeys ${fqdn} ${keyScript}";
+        in ''
+          ${nodeLine}
+
           EXTRA_ARGS=""
-          if [ -d "$tmpdir/${nodeFQDN node}/extra-files" ]; then
-            EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}/extra-files"
+          if [ -d "$tmpdir/${fqdn}/extra-files" ]; then
+            EXTRA_ARGS="--extra-files $tmpdir/${fqdn}/extra-files"
           fi
-          ${let
-              script = encryptionKeyScripts."${nodeFQDN node}" or null;
-            in optionalString (script != null) "encryptionKeys ${nodeFQDN node} ${script}"
-          }
-          if [ -d "$tmpdir/${nodeFQDN node}/keys" ]; then
-            pushd "$tmpdir/${nodeFQDN node}/keys" > /dev/null
-            while IFS= read -r -d ''\'' file
+          ${keyLine}
+          if [ -d "$tmpdir/${fqdn}/keys" ]; then
+            pushd "$tmpdir/${fqdn}/keys" > /dev/null
+            find . -type f -print0 | while IFS= read -r -d "" file
             do
-              src="$(readlink -m "$tmpdir/${nodeFQDN node}/keys/$file")"
+              src="$(readlink -m "$tmpdir/${fqdn}/keys/$file")"
               dst="$(readlink -m "/$file")"
               EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
-            done <   <(find . -type f -print0)
+            done
             popd > /dev/null
           fi
-          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
+          ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${fqdn} root@${nodeAddress node} $EXTRA_ARGS
         '')
         nodes))}
 
@@ -238,31 +242,34 @@ in {
         popd > /dev/null
       }
 
-      ${(builtins.concatStringsSep "\n" (builtins.map (node: ''
-          if [[ "$*" == *"${nodeFQDN node}"* ]]; then
-            ${let
-                script = if node.pool.kind == "controller" then controllerScript else  workerScript;
-              in optionalString (script != null) "nodeScript ${nodeFQDN node} ${script}"
-            }
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: let
+          fqdn = nodeFQDN node;
+          nodeScript =
+            if node.pool.kind == "controller"
+            then controllerScript
+            else workerScript;
+          nodeLine = optionalString (nodeScript != null) "nodeScript ${fqdn} ${nodeScript}";
+          keyScript = encryptionKeyScripts."${fqdn}" or null;
+          keyLine = optionalString (keyScript != null) "encryptionKeys ${fqdn} ${keyScript}";
+        in ''
+          if [[ "$*" == *"${fqdn}"* ]]; then
+            ${nodeLine}
             EXTRA_ARGS=""
-            if [ -d "$tmpdir/${nodeFQDN node}/extra-files" ]; then
-              EXTRA_ARGS="--extra-files $tmpdir/${nodeFQDN node}/extra-files"
+            if [ -d "$tmpdir/${fqdn}/extra-files" ]; then
+              EXTRA_ARGS="--extra-files $tmpdir/${fqdn}/extra-files"
             fi
-            ${let
-                script = encryptionKeyScripts."${nodeFQDN node}" or null;
-              in optionalString (script != null) "encryptionKeys ${nodeFQDN node} ${script}"
-            }
-            if [ -d "$tmpdir/${nodeFQDN node}/keys" ]; then
-              pushd "$tmpdir/${nodeFQDN node}/keys" > /dev/null
-              while IFS= read -r -d ''\'' file
+            ${keyLine}
+            if [ -d "$tmpdir/${fqdn}/keys" ]; then
+              pushd "$tmpdir/${fqdn}/keys" > /dev/null
+              find . -type f -print0 | while IFS= read -r -d "" file
               do
-                src="$(readlink -m "$tmpdir/${nodeFQDN node}/keys/$file")"
+                src="$(readlink -m "$tmpdir/${fqdn}/keys/$file")"
                 dst="$(readlink -m "/$file")"
                 EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
-              done <   <(find . -type f -print0)
+              done
               popd > /dev/null
             fi
-            ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${nodeFQDN node} root@${nodeAddress node} $EXTRA_ARGS
+            ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${fqdn} root@${nodeAddress node} $EXTRA_ARGS
           fi
         '')
         nodes))}
