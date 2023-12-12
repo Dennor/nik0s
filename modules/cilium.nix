@@ -49,11 +49,16 @@ in {
   };
   config = mkIf cfg.enable {
     boot.kernelModules = mkIf (kind == "worker") [
+      "nft_compat"
       "xt_socket"
       "xt_mark"
       "xt_set"
       "xt_TPROXY"
       "xt_CT"
+      "xt_comment"
+      "xt_multiport"
+      "xt_conntrack"
+      "vxlan"
       "sch_ingress"
       "sha1-ssse3"
       "algif_hash"
