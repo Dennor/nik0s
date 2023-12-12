@@ -51,7 +51,7 @@ in {
             useDHCP = private.dhcp == true;
             ipv4 = private.ipv4;
             ipv6 = private.ipv6;
-            mtu = public.mtu or null;
+            mtu = private.mtu or null;
           };
         };
         firewall = {
