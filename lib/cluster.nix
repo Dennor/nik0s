@@ -188,12 +188,12 @@ in {
           ${keyLine}
           if [ -d "$tmpdir/${fqdn}/keys" ]; then
             pushd "$tmpdir/${fqdn}/keys" > /dev/null
-            find . -type f -print0 | while IFS= read -r -d "" file
+            while IFS= read -r -d "" file
             do
               src="$(readlink -m "$tmpdir/${fqdn}/keys/$file")"
               dst="$(readlink -m "/$file")"
               EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
-            done
+            done < <(find . -type f -print0)
             popd > /dev/null
           fi
           ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${fqdn} root@${nodeAddress node} $EXTRA_ARGS
@@ -261,12 +261,12 @@ in {
             ${keyLine}
             if [ -d "$tmpdir/${fqdn}/keys" ]; then
               pushd "$tmpdir/${fqdn}/keys" > /dev/null
-              find . -type f -print0 | while IFS= read -r -d "" file
+              while IFS= read -r -d "" file
               do
                 src="$(readlink -m "$tmpdir/${fqdn}/keys/$file")"
                 dst="$(readlink -m "/$file")"
                 EXTRA_ARGS="$EXTRA_ARGS --disk-encryption-keys $dst $src"
-              done
+              done < <(find . -type f -print0)
               popd > /dev/null
             fi
             ${pkgs.nix}/bin/nix run github:numtide/nixos-anywhere -- --flake ${flake}#${fqdn} root@${nodeAddress node} $EXTRA_ARGS
