@@ -297,11 +297,23 @@ in {
     updateScript = pkgs.writeShellScript "update_cluster.sh" ''
       set -e
 
+      # Prepare nodes by updating the target but hold on switching
+      prepare_controller() {
+        echo "preparing controller node $2"
+        # Using boot over switch since many units will fail to activate anyways interrupting
+        # the update process
+        ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${flake}#$2 --target-host "root@$1"
+      }
+
+      prepare_worker() {
+        echo "preparing worker node $2"
+        ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${flake}#$2 --target-host "root@$1"
+      }
+
       update_controller() {
         echo "updating controller node $2"
         # Using boot over switch since many units will fail to activate anyways interrupting
         # the update process
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${flake}#$2 --target-host "root@$1"
         ssh -oStrictHostKeyChecking=accept-new "root@$1" reboot
         sleep 5
         until ssh -oStrictHostKeyChecking=accept-new "root@$1" k0s kubectl get nodes; do
@@ -318,7 +330,6 @@ in {
         # We give the cluster 2 minutes too evict all pods gracefully, if that fails we forcefully delete them
         ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data --timeout 120s $2 ||
           ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data --disable-eviction $2
-        ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${flake}#$2 --target-host "root@$1"
         ssh -oStrictHostKeyChecking=accept-new "root@$1" reboot
         sleep 5
         until ssh -oStrictHostKeyChecking=accept-new "root@$1" systemctl status k0s; do
@@ -331,6 +342,15 @@ in {
         done
         echo "worker node $2 updated"
       }
+
+
+      # prepare nodes for reboot
+      ${(builtins.concatStringsSep "\n" (builtins.map (node: "${
+          if node.pool.kind == "controller"
+          then "prepare_controller"
+          else "prepare_worker"
+        } ${nodeAddress node} ${nodeFQDN node}")
+        nodes))}
 
       ${(builtins.concatStringsSep "\n" (builtins.map (node: "${
           if node.pool.kind == "controller"
