@@ -28,7 +28,7 @@ with pkgs; let
       cp -r ${src}/tests/* $out
     '';
   };
-  k0s = pkgs.k0s_1_28_4;
+  k0s = pkgs.k0s_1_29_1;
   ciliumChart = pkgs.ciliumChart;
   mkTestCase = cluster: {
     name = cluster.clusterName;
