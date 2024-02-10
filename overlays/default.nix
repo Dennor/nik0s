@@ -1,7 +1,8 @@
 final: prev:
-{
-  linuxPackages_6_5_hardened_bpfilter = with prev.lib;
-    prev.linuxPackagesFor (prev.linux_6_5_hardened.override {
+with prev.lib;
+  (builtins.listToAttrs (builtins.map (ver: {
+    name = "linuxPackages_${ver}_hardened_bpfilter";
+    value = prev.linuxPackagesFor (prev."linux_${ver}_hardened".override {
       structuredExtraConfig = with kernel; {
         STRICT_DEVMEM = mkForce no;
         SCHEDSTATS = mkForce yes;
@@ -14,15 +15,17 @@ final: prev:
       };
       ignoreConfigErrors = true;
     });
-  lib =
-    prev.lib
-    // {
-      k0s-utils =
-        {
-          mkHelmChart = import ../lib/helm.nix;
-          mkBundle = import ../lib/airgap.nix;
-        }
-        // import ../lib/cluster.nix {pkgs = final;};
-    };
-}
-// import ../packages {pkgs = final;}
+  }) ["6_5" "6_6" "6_7"]))
+  // {
+    lib =
+      prev.lib
+      // {
+        k0s-utils =
+          {
+            mkHelmChart = import ../lib/helm.nix;
+            mkBundle = import ../lib/airgap.nix;
+          }
+          // import ../lib/cluster.nix {pkgs = final;};
+      };
+  }
+  // import ../packages {pkgs = final;}

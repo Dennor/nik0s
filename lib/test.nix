@@ -92,7 +92,7 @@ with pkgs; let
             ++ [
               ({config, ...}: {
                 boot = {
-                  kernelPackages = pkgs.linuxPackages_6_5_hardened_bpfilter;
+                  kernelPackages = pkgs.linuxPackages_6_6_hardened_bpfilter;
                 };
                 environment.systemPackages = [pkgs.cri-tools pkgs.k0s pkgs.curl testPackage];
                 environment.variables = {
