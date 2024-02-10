@@ -304,7 +304,7 @@ in {
         ${pkgs.nixos-rebuild}/bin/nixos-rebuild boot --flake ${flake}#$2 --target-host "root@$1"
         ssh -oStrictHostKeyChecking=accept-new "root@$1" reboot
         sleep 5
-        until ssh -oStrictHostKeyChecking=accept-new "root@$1" systemctl status k0s; do
+        until ssh -oStrictHostKeyChecking=accept-new "root@$1" k0s kubectl get nodes; do
           sleep 5
           echo "waiting for controller to finish updating $2"
         done
