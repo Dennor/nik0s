@@ -45,6 +45,11 @@ in {
         type = str;
         default = "";
       };
+      chart = mkOption {
+        description = "Optional chart package";
+        type = package;
+        default = pkgs.ciliumChart;
+      };
     };
   };
   config = mkIf cfg.enable {
@@ -83,9 +88,9 @@ in {
     ];
     helm = mkIf (kind == "controller") {
       cilium = {
+        inherit (cfg) chart;
         enable = true;
         kubeconfig = cfg.kubeconfig;
-        chart = pkgs.ciliumChart;
         namespace = "kube-system";
         values =
           {
@@ -100,12 +105,13 @@ in {
                 spire = {
                   enabled = cfg.spire;
                   install = {
+                    initImage = image;
                     # Override spire images to not include digest
                     agent = {
-                      image = "ghcr.io/spiffe/spire-agent:1.6.3";
+                      inherit image;
                     };
                     server = {
-                      image = "ghcr.io/spiffe/spire-server:1.6.3";
+                      inherit image;
                     };
                   };
                 };
