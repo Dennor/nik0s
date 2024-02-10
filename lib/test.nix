@@ -4,6 +4,20 @@
   pkgs ? import <nixpkgs> {},
 }:
 with pkgs; let
+  mkBundle = import ../lib/airgap.nix;
+  testingBundle = mkBundle {
+    inherit (pkgs) stdenv dockerTools;
+    images = [
+      {
+        imageName = "curlimages/curl";
+        imageDigest = "sha256:c3b8bee303c6c6beed656cfc921218c529d65aa61114eb9e27c62047a1271b9b";
+        sha256 = "0qcpklsjdakw1kl4hv0crsvz86j8xkkiyhxig95jl7xyyc80xd9p";
+        finalImageName = "curlimages/curl";
+        finalImageTag = "8.6.0";
+      }
+    ];
+    name = "testing_bundle";
+  };
   testPackage = pkgs.stdenv.mkDerivation rec {
     name = "test-package";
     src = ../.;
@@ -84,8 +98,8 @@ with pkgs; let
         globalTimeout = 1200;
         name = node.uniqueName;
         value = {
-          virtualisation.diskSize = 6144;
-          virtualisation.memorySize = 1536;
+          virtualisation.diskSize = 8192;
+          virtualisation.memorySize = 2048;
           virtualisation.vlans = [1 2];
           imports =
             ((modules testCase) node)
@@ -98,6 +112,8 @@ with pkgs; let
                 environment.variables = {
                   CONTAINER_RUNTIME_ENDPOINT = "unix:///run/k0s/containerd.sock";
                 };
+                networking.nameservers = ["1.1.1.1" "1.0.0.1"];
+
                 cluster = {
                   enable = true;
                   name = testCase.name;
@@ -134,8 +150,9 @@ with pkgs; let
                   master = node.config.node.master or null;
                   joinToken = node.config.node.joinToken or null;
                   manifests = (manifests testCase) node;
-                  bundles = [pkgs.ciliumBundle pkgs.openebsLocalPVBundle];
+                  bundles = [pkgs.ciliumBundle pkgs.openebsLocalPVBundle testingBundle];
                   version = "1.28.4";
+                  airgap = true;
                 };
                 documentation.nixos.enable = false;
               })
@@ -164,7 +181,7 @@ with pkgs; let
       # Test connectivity
       ${controller}.succeed("k0s kubectl get -A pods -o go-template='{{ range .items}}{{ range .status.containerStatuses }}{{ .ready }}{{ end }}{{ end }}' | grep -v false")
       # Test if kubernetes is reachable for pods
-      ${controller}.succeed("k0s kubectl run --image busybox:1.35.0 --restart=OnFailure --command test1 -- sh -c 'wget https://kubernetes:443/healthz 2>&1 | grep 401'")
+      ${controller}.succeed("k0s kubectl run --image curlimages/curl:8.6.0 --restart=OnFailure test1 -- -I -k https://kubernetes")
       # Make sure that pod completed
       ${controller}.wait_until_succeeds("k0s kubectl get pods | grep test1 | grep Completed")
       # Test kube apiserver connectivity
