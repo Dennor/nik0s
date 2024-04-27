@@ -8,14 +8,13 @@ with prev.lib;
         SCHEDSTATS = mkForce yes;
         RC_CORE = yes;
         BPF_LIRC_MODE2 = yes;
-        BPFILTER = yes;
         FPROBE = yes;
         FUNCTION_ERROR_INJECTION = yes;
         PREEMPT_NONE = yes;
       };
       ignoreConfigErrors = true;
     });
-  }) ["6_5" "6_6" "6_7"]))
+  }) ["6_5" "6_6" "6_7" "6_8"]))
   // {
     lib =
       prev.lib
