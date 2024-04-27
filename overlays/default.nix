@@ -14,7 +14,7 @@ with prev.lib;
       };
       ignoreConfigErrors = true;
     });
-  }) ["6_5" "6_6" "6_7" "6_8"]))
+  }) ["6_5" "6_6" "6_7"]))
   // {
     lib =
       prev.lib
