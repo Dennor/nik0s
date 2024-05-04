@@ -328,7 +328,7 @@ in {
         # This here is on purpose done from controller node kubectl rather than local machine
         # to not have a dependency on the current system config.
         # We give the cluster 2 minutes too evict all pods gracefully, if that fails we forcefully delete them
-        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data --timeout 120s $2 ||
+        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data --timeout 1200s $2 ||
           ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl drain --ignore-daemonsets --delete-emptydir-data --disable-eviction $2
         ssh -oStrictHostKeyChecking=accept-new "root@$1" reboot
         sleep 5
