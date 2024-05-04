@@ -113,5 +113,5 @@ in
         finalImageTag = "1.8.5";
       }
     ];
-    name = "cilium_airgap_1_15_0";
+    name = "cilium_airgap_1_15_4";
   }
