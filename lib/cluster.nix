@@ -288,6 +288,8 @@ in {
   mkUpdateScript = {
     flake,
     cluster,
+    drainScript ? ""
+    resumeScript ? ""
   }: let
     # Enforce order of update, controller nodes first
     controllers = controllerNodes cluster;
@@ -324,6 +326,10 @@ in {
       }
 
       update_worker() {
+        echo "Running user drain script"
+        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" << EOF
+          ${drainScript}
+        EOF
         echo "waiting for worker node to be completely drained $2"
         # This here is on purpose done from controller node kubectl rather than local machine
         # to not have a dependency on the current system config.
@@ -340,6 +346,10 @@ in {
           sleep 5
           echo "waiting for worker node $2 to be available again"
         done
+        echo "Running user resume script"
+        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" << EOF
+          ${resumeScript}
+        EOF
         echo "worker node $2 updated"
       }
 
