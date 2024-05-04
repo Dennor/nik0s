@@ -288,8 +288,8 @@ in {
   mkUpdateScript = {
     flake,
     cluster,
-    drainScript ? ""
-    resumeScript ? ""
+    drainScript ? "",
+    resumeScript ? "",
   }: let
     # Enforce order of update, controller nodes first
     controllers = controllerNodes cluster;
