@@ -326,10 +326,10 @@ in {
       }
 
       update_worker() {
+        export NODE="$2"
         echo "Running user drain script"
-        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" << EOF
-          ${drainScript}
-        EOF
+        ${drainScript}
+
         echo "waiting for worker node to be completely drained $2"
         # This here is on purpose done from controller node kubectl rather than local machine
         # to not have a dependency on the current system config.
@@ -342,14 +342,14 @@ in {
           sleep 5
           echo "waiting for worker node $2 to restart"
         done
+
         until ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" k0s kubectl uncordon $2; do
           sleep 5
           echo "waiting for worker node $2 to be available again"
         done
         echo "Running user resume script"
-        ssh -oStrictHostKeyChecking=accept-new "root@${managmentAddress}" << EOF
-          ${resumeScript}
-        EOF
+        ${resumeScript}
+
         echo "worker node $2 updated"
       }
 
