@@ -290,6 +290,8 @@ in {
     cluster,
     drainScript ? "",
     resumeScript ? "",
+    beforeScript ? "",
+    afterScript ? "",
   }: let
     # Enforce order of update, controller nodes first
     controllers = controllerNodes cluster;
@@ -298,6 +300,9 @@ in {
     managmentAddress = nodeAddress (builtins.elemAt controllers 0);
     updateScript = pkgs.writeShellScript "update_cluster.sh" ''
       set -e
+
+      echo "Running user before script"
+      ${beforeScript}
 
       # Prepare nodes by updating the target but hold on switching
       prepare_controller() {
@@ -368,6 +373,9 @@ in {
           else "update_worker"
         } ${nodeAddress node} ${nodeFQDN node}")
         nodes))}
+
+      echo "Running user after script"
+      ${afterScript}
     '';
   in
     pkgs.stdenv.mkDerivation {
