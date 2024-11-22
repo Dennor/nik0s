@@ -1,0 +1,20 @@
+diff -rupN base/templates/cilium-agent/daemonset.yaml new/templates/cilium-agent/daemonset.yaml
+--- base/templates/cilium-agent/daemonset.yaml	2024-11-22 10:05:19.163365905 +0100
++++ new/templates/cilium-agent/daemonset.yaml	2024-11-22 10:07:08.513142074 +0100
+@@ -837,7 +837,7 @@ spec:
+         # To be able to load kernel modules
+       - name: lib-modules
+         hostPath:
+-          path: /lib/modules
++          path: {{ .Values.libModulesPath }}
+         # To access iptables concurrently with other processes (e.g. kube-proxy)
+       - name: xtables-lock
+         hostPath:
+diff -rupN base/values.yaml new/values.yaml
+--- base/values.yaml	2024-11-22 10:05:19.168366022 +0100
++++ new/values.yaml	2024-11-22 10:07:08.517142183 +0100
+@@ -3561,3 +3561,4 @@ authentication:
+       agentSocketPath: /run/spire/sockets/agent/agent.sock
+       # -- SPIRE connection timeout
+       connectionTimeout: 30s
++libModulesPath: /lib/modules
