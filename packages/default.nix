@@ -10,15 +10,15 @@
   k0sVersions = ["1.28.3" "1.28.4" "1.29.1" "1.29.4" "1.30.4"];
   k0sPackages = versionedPackage "k0s" k0sVersions;
   k0sBundlePackages = versionedPackage "k0s_bundle" k0sVersions;
-  ciliumVersions = ["1.14.4" "1.15.0" "1.15.4" "1.15.5"];
+  ciliumVersions = ["1.14.4" "1.15.0" "1.15.4" "1.15.5" "1.16.4"];
   ciliumPackages = versionedPackage "cilium" ciliumVersions;
   ciliumAirgapPackages = versionedPackage "cilium_airgap" ciliumVersions;
 in
   builtins.mapAttrs (name: value: pkgs.callPackage value {}) ({
       k0s = ./k0s.nix;
       k0sBundle = ./k0s_airgap.nix;
-      ciliumChart = ./cilium_1_15_0.nix;
-      ciliumBundle = ./cilium_airgap_1_15_0.nix;
+      ciliumChart = ./cilium_1_16_4.nix;
+      ciliumBundle = ./cilium_airgap_1_16_4.nix;
       openebsChart = ./openebs.nix;
       openebsLocalPVBundle = ./openebs_localpv_airgap.nix;
     }
