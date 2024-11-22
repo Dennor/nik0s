@@ -131,7 +131,6 @@ in {
             operator = {
               replicas = cfg.operator.replicas;
             };
-            remoteNodeIdentity = true;
             priorityClassName = "system-node-critical";
             libModulesPath = "/run/current-system/kernel-modules/lib/modules";
             # We're already using an airgaped bundle, do not use digest because the it seems to fail
