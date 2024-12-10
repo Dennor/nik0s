@@ -2,7 +2,7 @@
   description = "Defines k0s cluster nodes configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
   };
 
   outputs = {
