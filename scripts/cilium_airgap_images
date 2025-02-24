@@ -1,0 +1,8 @@
+#! /usr/bin/env nix-shell
+#! nix-shell -i bash -p kubernetes-helm
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+nix build .#cilium_${1}
+cd result
+$SCRIPT_DIR/airgap_images $(helm template . --set=hubble.tls.enabled=true --set=hubble.tls.auto.enabled=true  --set=hubble.tls.auto.method=cronJob    --set=hubble.relay.enabled=true --set=hubble.ui.enabled=true  --set=nodeinit.enabled=true --set=authentication.mutual.spire.enabled=true --set=etcd.enabled=true --set=clustermesh.useAPIServer=true | grep '^[[:blank:]]*image:' | sed 's/[^"]*"//' | sed 's/@.*$//' | sort -u)
+
