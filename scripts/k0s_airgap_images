@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#! nix-shell -i bash -p curl
+#! nix-shell -i bash -p jq
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+$SCRIPT_DIR/airgap_images $(curl -L "https://github.com/k0sproject/k0s/releases/download/$(printf %s "$1"|jq -sRr @uri)/airgap-images-list.txt")

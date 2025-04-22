@@ -7,7 +7,7 @@
       value = ./${pkg}_${v}.nix;
     }) (versionsToSuffixes versions);
   versionedPackage = pkg: versions: builtins.listToAttrs (pkgSuffixes pkg versions);
-  k0sVersions = ["1.28.3" "1.28.4" "1.29.1" "1.29.4" "1.30.4"];
+  k0sVersions = ["1.28.3" "1.28.4" "1.29.1" "1.29.4" "1.30.4" "1.31.7"];
   k0sPackages = versionedPackage "k0s" k0sVersions;
   k0sBundlePackages = versionedPackage "k0s_bundle" k0sVersions;
   ciliumVersions = ["1.14.4" "1.15.0" "1.15.4" "1.15.5" "1.16.4" "1.16.7"];
