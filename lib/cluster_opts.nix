@@ -211,6 +211,26 @@ with types; let
         type = attrsOf str;
         default = {};
       };
+      taints = mkOption {
+        description = "List of taints that will be added to the node";
+        type = nullOr listOf (submodule {
+          options = {
+            key = mkOption {
+              description = "Key identifing taint";
+              type = str;
+            };
+            value = mkOption {
+              description = "Value of a taint";
+              type = str;
+            };
+            effect = mkOption {
+              description = "Taint effect";
+              type = enum ["NoExecute" "NoSchedule" "PreferNoSchedule"];
+            };
+          };
+        });
+        default = null;
+      };
     };
   };
   pool = submodule {
