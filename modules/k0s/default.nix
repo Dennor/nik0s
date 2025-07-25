@@ -125,7 +125,7 @@ in {
     };
     taints = mkOption {
       description = "List of taints that will be added to the node";
-      type = nullOr listOf (submodule {
+      type = nullOr (listOf (submodule {
         options = {
           key = mkOption {
             description = "Key identifing taint";
@@ -140,7 +140,7 @@ in {
             type = enum ["NoExecute" "NoSchedule" "PreferNoSchedule"];
           };
         };
-      });
+      }));
       default = null;
     };
     version = mkOption {
