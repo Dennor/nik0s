@@ -17,6 +17,7 @@
     else ""
   } --hostname-override=${node_name}";
   labels = builtins.map (label: "${label}=${cfg.labels.${label}}") (builtins.attrNames cfg.labels);
+  taints = builtins.map (taint: "${taint.key}=${taint.value}:${taint.effect}") cfg.taints;
   startK0s = joinToken:
     pkgs.writeShellScript "start_k0s.sh" ''
       set -e
@@ -35,6 +36,11 @@
         if ((builtins.length labels) > 0)
         then ''          \
           --labels='${builtins.concatStringsSep "," labels}' ''
+        else ""
+      } ${
+        if ((builtins.length taints) > 0)
+        then ''          \
+          --taints='${builtins.concatStringsSep "," taints}' ''
         else ""
       }'';
   k0sBundle =

@@ -123,6 +123,26 @@ in {
       type = attrsOf str;
       default = {};
     };
+    taints = mkOption {
+      description = "List of taints that will be added to the node";
+      type = nullOr listOf (submodule {
+        options = {
+          key = mkOption {
+            description = "Key identifing taint";
+            type = str;
+          };
+          value = mkOption {
+            description = "Value of a taint";
+            type = str;
+          };
+          effect = mkOption {
+            description = "Taint effect";
+            type = enum ["NoExecute" "NoSchedule" "PreferNoSchedule"];
+          };
+        };
+      });
+      default = null;
+    };
     version = mkOption {
       description = "k0s package version. This is required argument to make sure that there's no accidental update. It should be one of k0s versions in packages without the +k0s suffix. This flake will only support 4 latest k0s minor versions starting from 1.28.3.";
       type = str;
