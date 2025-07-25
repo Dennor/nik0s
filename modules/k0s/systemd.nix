@@ -17,7 +17,7 @@
     else ""
   } --hostname-override=${node_name}";
   labels = builtins.map (label: "${label}=${cfg.labels.${label}}") (builtins.attrNames cfg.labels);
-  taints = builtins.map (taint: "${taint.key}=${taint.value}:${taint.effect}") cfg.taints;
+  taints = builtins.map (taint: "${taint.key}=${taint.value}:${taint.effect}") (cfg.taints or []);
   startK0s = joinToken:
     pkgs.writeShellScript "start_k0s.sh" ''
       set -e
