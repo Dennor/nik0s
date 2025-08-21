@@ -10,7 +10,7 @@
   k0sVersions = ["1.28.3" "1.28.4" "1.29.1" "1.29.4" "1.30.4" "1.31.7" "1.32.3"];
   k0sPackages = versionedPackage "k0s" k0sVersions;
   k0sBundlePackages = versionedPackage "k0s_bundle" k0sVersions;
-  ciliumVersions = ["1.14.4" "1.15.0" "1.15.4" "1.15.5" "1.16.4" "1.16.7" "1.17.3" "1.17.7"];
+  ciliumVersions = ["1.15.0" "1.15.4" "1.15.5" "1.16.4" "1.16.7" "1.17.3" "1.17.7"];
   ciliumPackages = versionedPackage "cilium" ciliumVersions;
   ciliumAirgapPackages = versionedPackage "cilium_airgap" ciliumVersions;
 in
