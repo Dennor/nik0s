@@ -73,23 +73,7 @@ with pkgs; let
     modules ? (
       testCase: node: lib.forEach (lib.attrValues (import ../modules)) (mod: args: (mod (args // {inherit pkgs;})))
     ),
-    helm ? (testCase: node:
-      if node.config.pool.kind == "controller"
-      then {
-        openebs-localpv = {
-          enable = true;
-          chart = pkgs.openebsChart;
-          namespace = "openebs";
-          kubeconfig = "/var/lib/k0s/pki/admin.conf";
-          values = {
-            localprovisioner = {
-              deviceClass.enabled = false;
-              hostpathClass.isDefaultClass = true;
-            };
-          };
-        };
-      }
-      else {}),
+    helm ? (testCase: node: {}),
     ...
   }: {...}: {
     name = testCase.name;

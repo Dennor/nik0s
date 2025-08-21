@@ -19,8 +19,6 @@ in
       k0sBundle = ./k0s_airgap.nix;
       ciliumChart = ./cilium_1_16_4.nix;
       ciliumBundle = ./cilium_airgap_1_16_4.nix;
-      openebsChart = ./openebs.nix;
-      openebsLocalPVBundle = ./openebs_localpv_airgap.nix;
     }
     // k0sPackages
     // k0sBundlePackages
