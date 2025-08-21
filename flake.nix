@@ -2,7 +2,7 @@
   description = "Defines k0s cluster nodes configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
   };
 
   outputs = {
@@ -11,9 +11,6 @@
     ...
   }:
     with nixpkgs; let
-      clusterLib = import ./lib {
-        inherit lib;
-      };
       forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux"];
     in {
       overlays.default = import ./overlays;
