@@ -70,6 +70,16 @@ in {
       description = "Pod subnet";
       default = "10.244.0.0/16";
     };
+    ipv6ServiceCIDR = mkOption {
+      type = str;
+      description = "IPv6 service subnet";
+      default = "";
+    };
+    ipv6PodCIDR = mkOption {
+      type = nullOr str;
+      description = "IPv6 pod subnet";
+      default = "";
+    };
     master = mkOption {
       type = nullOr (submodule {
         options = {

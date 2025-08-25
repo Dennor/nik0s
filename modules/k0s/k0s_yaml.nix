@@ -40,6 +40,11 @@
         agentPort = 8132;
       };
       network = {
+        dualStack = {
+          enabled = cfg.ipv6ServiceCIDR != "" && cfg.ipv6PodCIDR != "";
+          IPv6podCIDR = cfg.ipv6PodCIDR;
+          IPv6serviceCIDR = cfg.ipv6ServiceCIDR;
+        };
         clusterDomain = "cluster.local";
         kubeProxy = {
           disabled = true;
