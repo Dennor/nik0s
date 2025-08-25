@@ -19,7 +19,25 @@
           then {externalAddress = cfg.api.externalAddress;}
           else {}
         );
-      controllerManager = {};
+      controllerManager = {
+        extraArgs =
+          {}
+          // (
+            if (cfg.nodeCidr != "")
+            then {
+              node-cidr-mask-size-ipv4 = cfg.nodeCidr;
+            }
+            else {}
+          )
+          // (
+            if (cfg.ipv6NodeCidr != "")
+            then {
+              node-cidr-mask-size-ipv6 = cfg.ipv6NodeCidr;
+            }
+            else {}
+          );
+      };
+
       extensions = {
         storage = {
           create_default_storage_class = false;

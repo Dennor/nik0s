@@ -70,14 +70,24 @@ in {
       description = "Pod subnet";
       default = "10.244.0.0/16";
     };
+    nodeCidr = mkOption {
+      type = str;
+      description = "Node cidr for pod";
+      default = "";
+    };
     ipv6ServiceCIDR = mkOption {
       type = str;
       description = "IPv6 service subnet";
       default = "";
     };
     ipv6PodCIDR = mkOption {
-      type = nullOr str;
+      type = str;
       description = "IPv6 pod subnet";
+      default = "";
+    };
+    ipv6NodeCidr = mkOption {
+      type = str;
+      description = "IPv6 node cidr for pod";
       default = "";
     };
     master = mkOption {
