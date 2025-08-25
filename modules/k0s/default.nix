@@ -46,6 +46,13 @@ in {
         default = {};
       };
     };
+    controllerManager = {
+      extraArgs = mkOption {
+        description = "Extra arguments to pass to kube-apiserver";
+        type = attrsOf str;
+        default = {};
+      };
+    };
     storage = {
       etcd = {
         peerAddress = mkOption {

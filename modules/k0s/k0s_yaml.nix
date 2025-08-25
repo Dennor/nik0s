@@ -21,7 +21,7 @@
         );
       controllerManager = {
         extraArgs =
-          {}
+          cfg.controllerManager.extraArgs
           // (
             if (cfg.nodeCidr != "")
             then {
