@@ -1,0 +1,20 @@
+diff -rupN result/templates/cilium-agent/daemonset.yaml chart/templates/cilium-agent/daemonset.yaml
+--- result/templates/cilium-agent/daemonset.yaml	1970-01-01 01:00:01.000000000 +0100
++++ chart/templates/cilium-agent/daemonset.yaml	2025-08-26 00:00:00.000000000 +0200
+@@ -8871,7 +871,7 @@ spec:
+         # To be able to load kernel modules
+       - name: lib-modules
+         hostPath:
+-          path: /lib/modules
++          path: {{ .Values.libModulesPath }}
+         # To access iptables concurrently with other processes (e.g. kube-proxy)
+       - name: xtables-lock
+         hostPath:
+diff -rupN result/values.yaml chart/values.yaml
+--- result/values.yaml	1970-01-01 01:00:01.000000000 +0100
++++ chart/values.yaml	2025-08-26 00:00:00.000000000 +0200
+@@ -4000,3 +4000,4 @@ authentication:
+ enableInternalTrafficPolicy: true
+ # -- Enable LoadBalancer IP Address Management
+ enableLBIPAM: true
++libModulesPath: /lib/modules
